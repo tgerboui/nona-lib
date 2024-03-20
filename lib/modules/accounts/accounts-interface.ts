@@ -4,7 +4,7 @@ interface BaseReceivableOptions {
 }
 
 export interface ReceivableOptionsSorted extends BaseReceivableOptions {
-  sort?: true;
+  sort: true;
 }
 
 export interface ReceivableOptionsUnsorted extends BaseReceivableOptions {

@@ -20,7 +20,8 @@ export class Nona {
   account(privateKey: string): Account {
     return new Account({
       rpc: this.rpc,
-      accounts: new Accounts(this.rpc),
+      blocks: this.blocks,
+      accounts: this.accounts,
       privateKey,
     });
   }
