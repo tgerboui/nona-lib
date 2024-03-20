@@ -1,4 +1,5 @@
 import { Rpc } from '../services/rpc/rpc';
+import { Account } from './account/account';
 import { Accounts } from './accounts/accounts';
 import { Blocks } from './blocks/blocks';
 import { Key } from './key/key';
@@ -14,5 +15,13 @@ export class Nona {
     this.blocks = new Blocks(this.rpc);
     this.key = new Key(this.rpc);
     this.accounts = new Accounts(this.rpc);
+  }
+
+  account(privateKey: string): Account {
+    return new Account({
+      rpc: this.rpc,
+      accounts: new Accounts(this.rpc),
+      privateKey,
+    });
   }
 }
