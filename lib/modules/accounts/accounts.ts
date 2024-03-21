@@ -25,7 +25,7 @@ export class Accounts extends RpcConsummer {
   }: ReceivableOptions): Promise<Receivable> {
     const receivable = await this.rpc.call('receivable', {
       account,
-      count: count?.toString() || undefined,
+      count: count?.toString() ?? undefined,
       sorting: sort,
     });
 

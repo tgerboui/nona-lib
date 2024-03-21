@@ -74,6 +74,7 @@ export class Account extends RpcConsummer {
     return this.blocks.process(block, 'open');
   }
 
+  /// Receive a pending transaction
   public async receive(hash?: string): Promise<string> {
     const info = await this.info(true);
     let receiveHash = hash;
@@ -103,5 +104,45 @@ export class Account extends RpcConsummer {
 
     // Broadcast to network
     return this.blocks.process(block, 'receive');
+  }
+
+  public async receiveHashes(hashes: string[]): Promise<string[]> {
+    const info = await this.info(true);
+    let balance = new BigNumber(info.balance);
+    let previous = info.frontier;
+    const receivedHashes: string[] = [];
+
+    for (const hash of hashes) {
+      const hashInfo = await this.blocks.info(hash);
+      balance = balance.plus(hashInfo.amount);
+
+      const block = await this.blocks.create({
+        account: this.account,
+        previous: previous,
+        representative: info.representative,
+        balance: balance.toString(10),
+        link: hash,
+        key: this.privateKey,
+      });
+      const processed = await this.blocks.process(block, 'receive');
+      previous = processed;
+      receivedHashes.push(processed);
+    }
+
+    return receivedHashes;
+  }
+
+  /// Receive all pending transactions
+  public async receiveAll(): Promise<string[]> {
+    const receivedHashes: string[] = [];
+
+    let receivable = await this.receivable({ count: 100 });
+    while (receivable.length > 0) {
+      const received = await this.receiveHashes(receivable);
+      receivedHashes.push(...received);
+      receivable = await this.receivable({ count: 100 });
+    }
+
+    return receivedHashes;
   }
 }
