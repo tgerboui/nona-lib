@@ -145,4 +145,29 @@ export class Account extends RpcConsummer {
 
     return receivedHashes;
   }
+
+  public async send(address: string, amount: number): Promise<string> {
+    const info = await this.info(true);
+    const balance = new BigNumber(info.balance);
+    // Convert nano amout to raw amount
+    // TODO: Create a converter
+    const rawAmount = new BigNumber(amount).shiftedBy(30);
+    console.log('rawAmount:', rawAmount.toString(10));
+
+    if (balance.isLessThan(amount)) {
+      throw new Error('Insufficient balance');
+    }
+
+    // TODO: Maybe set create block in a function in this class
+    const block = await this.blocks.create({
+      account: this.account,
+      previous: info.frontier,
+      representative: info.representative,
+      balance: balance.minus(rawAmount).toString(10),
+      link: address,
+      key: this.privateKey,
+    });
+
+    return this.blocks.process(block, 'send');
+  }
 }
