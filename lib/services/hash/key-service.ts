@@ -6,6 +6,8 @@ export class KeyService {
   }
 
   static getAccount(publicKey: string) {
-    return deriveAddress(publicKey).replace('xrb_', 'nano_');
+    return deriveAddress(publicKey, {
+      useNanoPrefix: true,
+    });
   }
 }
