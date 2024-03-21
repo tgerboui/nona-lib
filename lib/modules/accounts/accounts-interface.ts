@@ -1,17 +1,16 @@
-interface BaseReceivableOptions {
+export interface ReceivableOptions {
   account: string;
   count?: number;
+  sort?: boolean;
 }
 
-export interface ReceivableOptionsSorted extends BaseReceivableOptions {
+export interface ReceivableOptionsSorted extends ReceivableOptions {
   sort: true;
 }
 
-export interface ReceivableOptionsUnsorted extends BaseReceivableOptions {
+export interface ReceivableOptionsUnsorted extends ReceivableOptions {
   sort?: false;
 }
-
-export type ReceivableOptions = ReceivableOptionsSorted | ReceivableOptionsUnsorted;
 
 export type ReceivableHasheBlocks = string[];
 export type ReceivableValueBlocks = {

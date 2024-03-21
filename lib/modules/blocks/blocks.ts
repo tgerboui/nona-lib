@@ -1,6 +1,6 @@
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { BlockCreateOptions } from './blocks-interface';
-import { BlockCount, Block, BlockProcess } from './blocks-schema';
+import { BlockCreateOptions, BlockProcessSubtype } from './blocks-interface';
+import { BlockCount, Block, BlockProcess, BlockInfo } from './blocks-schema';
 
 export class Blocks extends RpcConsummer {
   async count(): Promise<BlockCount> {
@@ -20,13 +20,22 @@ export class Blocks extends RpcConsummer {
   }
 
   /// Return the hash of the block
-  public async process(block: Block['block']): Promise<string> {
+  public async process(block: Block['block'], subtype: BlockProcessSubtype): Promise<string> {
     const res = await this.rpc.call('process', {
       json_block: 'true',
-      subtype: 'open',
+      subtype,
       block,
     });
 
     return this.parseHandler(res, BlockProcess).hash;
+  }
+
+  public async info(hash: string): Promise<BlockInfo> {
+    const res = await this.rpc.call('block_info', {
+      json_block: 'true',
+      hash,
+    });
+
+    return this.parseHandler(res, BlockInfo);
   }
 }

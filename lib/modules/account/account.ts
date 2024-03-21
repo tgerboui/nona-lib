@@ -1,11 +1,15 @@
+import BigNumber from 'bignumber.js';
 import { KeyService } from '../../services/hash/key-service';
 import { Accounts } from '../accounts/accounts';
 import {
+  Receivable,
   ReceivableHasheBlocks,
+  ReceivableOptions,
   ReceivableOptionsSorted,
   ReceivableOptionsUnsorted,
   ReceivableValueBlocks,
 } from '../accounts/accounts-interface';
+import { AccountInfo, AccountInfoRepresentative } from '../accounts/accounts-shemas';
 import { Blocks } from '../blocks/blocks';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { AccountOptions } from './account-interface';
@@ -33,18 +37,16 @@ export class Account extends RpcConsummer {
   public receivable(
     options: Omit<ReceivableOptionsSorted, 'account'>,
   ): Promise<ReceivableValueBlocks>;
-  public receivable(options: Omit<ReceivableOptionsUnsorted | ReceivableOptionsSorted, 'account'>) {
-    const { sort } = options;
+  public receivable(options: Omit<ReceivableOptions, 'account'>): Promise<Receivable>;
+  public receivable(options: Omit<ReceivableOptions, 'account'>): Promise<Receivable> {
+    return this.accounts.receivable({ ...options, account: this.account });
+  }
 
-    // TODO: Clean this horror show
-    // It is a probleme with fucntion overloading
-    if (sort == undefined) {
-      return this.accounts.receivable({ ...options, account: this.account, sort: undefined });
-    }
-    if (sort === true) {
-      return this.accounts.receivable({ ...options, account: this.account, sort: true });
-    }
-    return this.accounts.receivable({ ...options, account: this.account, sort: false });
+  // TODO: Set parameters in interface
+  async info(representative: true): Promise<AccountInfoRepresentative>;
+  async info(representative: boolean): Promise<AccountInfo>;
+  async info(representative = false): Promise<AccountInfo> {
+    return this.accounts.info(this.account, representative);
   }
 
   // TODO: Implement optional hash
@@ -67,9 +69,39 @@ export class Account extends RpcConsummer {
       balance: hashValue,
       key: this.privateKey,
     });
-    // Broadcast to network
-    const hashTr = await this.blocks.process(block);
 
-    return hashTr;
+    // Broadcast to network
+    return this.blocks.process(block, 'open');
+  }
+
+  public async receive(hash?: string): Promise<string> {
+    const info = await this.info(true);
+    let receiveHash = hash;
+
+    // If no hash is provided, get a receivable hash
+    if (!receiveHash) {
+      const receivable = await this.receivable({ count: 1 });
+      if (receivable.length === 0) {
+        throw new Error('No receivable blocks');
+      }
+      receiveHash = receivable[0];
+    }
+
+    // Get hash info
+    const hashInfo = await this.blocks.info(receiveHash);
+    const finalBalance = BigNumber(info.balance).plus(hashInfo.amount);
+
+    // Generate work and format block
+    const block = await this.blocks.create({
+      account: this.account,
+      previous: info.frontier,
+      representative: info.representative,
+      balance: finalBalance.toString(10),
+      link: receiveHash,
+      key: this.privateKey,
+    });
+
+    // Broadcast to network
+    return this.blocks.process(block, 'receive');
   }
 }

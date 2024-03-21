@@ -17,3 +17,5 @@ export interface BlockCreateOptions {
   /// If the block is sending funds, set link to the public key of the destination account. If it is receiving funds, set link to the hash of the block to receive. If the block has no balance change but is updating representative only, set link to 0.
   link: string;
 }
+
+export type BlockProcessSubtype = 'open' | 'receive' | 'change' | 'send' | 'state';
