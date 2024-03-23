@@ -26,3 +26,10 @@ export type AccountInfo = z.infer<typeof AccountInfo>;
 export type AccountInfoRepresentative = AccountInfo & {
   representative: string;
 };
+
+export const AccountRawBalance = z.object({
+  balance: z.string(),
+  pending: z.string(),
+  receivable: z.string(),
+});
+export type AccountRawBalance = z.infer<typeof AccountRawBalance>;

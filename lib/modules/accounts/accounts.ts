@@ -1,5 +1,6 @@
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import {
+  AccountBalance,
   Receivable,
   ReceivableHasheBlocks,
   ReceivableOptions,
@@ -10,9 +11,11 @@ import {
 import {
   AccountInfo,
   AccountInfoRepresentative,
+  AccountRawBalance,
   ReceivableHashes,
   ReceivableValues,
 } from './accounts-shemas';
+import { UnitService } from '../../services/unit/unit-service';
 
 export class Accounts extends RpcConsummer {
   public async receivable(options: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
@@ -47,5 +50,22 @@ export class Accounts extends RpcConsummer {
     const res = await this.rpc.call('account_info', { account, representative });
 
     return this.parseHandler(res, AccountInfo);
+  }
+
+  public async rawBalance(account: string): Promise<AccountRawBalance> {
+    const res = await this.rpc.call('account_balance', { account });
+
+    return this.parseHandler(res, AccountRawBalance);
+  }
+
+  // TODO: Explain why string and warn about converting to number
+  public async balance(account: string): Promise<AccountBalance> {
+    const { balance, pending, receivable } = await this.rawBalance(account);
+
+    return {
+      balance: UnitService.rawToNano(balance).toString(10),
+      pending: UnitService.rawToNano(pending).toString(10),
+      receivable: UnitService.rawToNano(receivable).toString(10),
+    };
   }
 }

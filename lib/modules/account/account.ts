@@ -13,6 +13,7 @@ import { AccountInfo, AccountInfoRepresentative } from '../accounts/accounts-she
 import { Blocks } from '../blocks/blocks';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { AccountOptions } from './account-interface';
+import { UnitService } from '../../services/unit/unit-service';
 
 export class Account extends RpcConsummer {
   private accounts: Accounts;
@@ -146,12 +147,13 @@ export class Account extends RpcConsummer {
     return receivedHashes;
   }
 
+  // TODO: Create send raw and add string to parameters
   public async send(address: string, amount: number): Promise<string> {
     const info = await this.info(true);
     const balance = new BigNumber(info.balance);
     // Convert nano amout to raw amount
     // TODO: Create a converter
-    const rawAmount = new BigNumber(amount).shiftedBy(30);
+    const rawAmount = UnitService.rawToNano(amount);
     console.log('rawAmount:', rawAmount.toString(10));
 
     if (balance.isLessThan(amount)) {
@@ -169,5 +171,13 @@ export class Account extends RpcConsummer {
     });
 
     return this.blocks.process(block, 'send');
+  }
+
+  public async balance() {
+    return this.accounts.balance(this.account);
+  }
+
+  public async rawBalance() {
+    return this.accounts.rawBalance(this.account);
   }
 }

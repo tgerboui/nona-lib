@@ -17,3 +17,9 @@ export type ReceivableValueBlocks = {
   [key: string]: string;
 };
 export type Receivable = ReceivableHasheBlocks | ReceivableValueBlocks;
+
+export interface AccountBalance {
+  balance: string;
+  pending: string;
+  receivable: string;
+}
