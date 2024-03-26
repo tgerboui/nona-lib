@@ -21,6 +21,7 @@ export interface ConfirmationMessage {
   previous: string;
   work: string;
   link: string;
+  confirmationType: string;
 }
 
 // TODO: Explain each field

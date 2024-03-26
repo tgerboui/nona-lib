@@ -15,6 +15,7 @@ export function messageMapper(message: unknown): ConfirmationMessage {
     previous: confirmation.block.previous,
     work: confirmation.block.work,
     link: confirmation.block.link,
+    confirmationType: confirmation.confirmation_type,
   };
 }
 
