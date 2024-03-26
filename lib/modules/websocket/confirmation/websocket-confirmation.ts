@@ -2,6 +2,7 @@ import { Observable, Subscription, filter, finalize, map } from 'rxjs';
 
 import { WebSocketManager } from '../manager/websocket-manager';
 import {
+  ConfirmationFilter,
   ConfirmationMessage,
   WebSocketConfirmationParams,
   WebSocketUpdateConfirmationParams,
@@ -22,18 +23,42 @@ export class WebSocketConfirmation {
   subscribe(params: WebSocketConfirmationParams): Subscription {
     const { next, error, complete } = params;
 
-    this.addSubscription(params.filter?.accounts);
+    const accountToListen = this.getAccountsToListen(params.filter);
+    this.addSubscription(accountToListen);
     return this.observable
       .pipe(
         map<unknown, ConfirmationMessage>((message) => messageMapper(message)),
         filter<ConfirmationMessage>((message) => messageFilter(message, params.filter)),
-        finalize(() => this.removeSubscription(params.filter?.accounts)),
+        finalize(() => this.removeSubscription(accountToListen)),
       )
       .subscribe({
         next,
         complete,
         error,
       });
+  }
+
+  private getAccountsToListen(confirmationFilter?: ConfirmationFilter): string[] | undefined {
+    if (!confirmationFilter) return undefined;
+    const { accounts, from, to } = confirmationFilter;
+    const accountsToListen = [];
+    let filtered = false;
+    if (accounts) {
+      accountsToListen.push(...accounts);
+      filtered = true;
+    }
+    if (from) {
+      accountsToListen.push(...from);
+      filtered = true;
+    }
+    if (to) {
+      accountsToListen.push(...to);
+      filtered = true;
+    }
+    if (!filtered) return undefined;
+
+    const uniqueAccounts = Array.from(new Set(accountsToListen));
+    return uniqueAccounts;
   }
 
   private addSubscription(accounts?: string[]): void {

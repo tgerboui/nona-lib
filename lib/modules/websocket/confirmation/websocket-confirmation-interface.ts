@@ -23,7 +23,10 @@ export interface ConfirmationMessage {
   link: string;
 }
 
+// TODO: Explain each field
 export interface ConfirmationFilter {
   accounts?: string[];
-  subtype?: string;
+  subtype?: string[];
+  from?: string[];
+  to?: string[];
 }

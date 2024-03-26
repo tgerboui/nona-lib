@@ -21,13 +21,19 @@ export function messageMapper(message: unknown): ConfirmationMessage {
 export function messageFilter(message: ConfirmationMessage, filter?: ConfirmationFilter): boolean {
   if (!filter) return true;
 
-  const { accounts, subtype } = filter;
+  const { accounts, subtype, from, to } = filter;
   const conditions: boolean[] = [];
   if (accounts) {
     conditions.push(accounts.includes(message.from) || accounts.includes(message.to));
   }
+  if (from) {
+    conditions.push(from.includes(message.from));
+  }
+  if (to) {
+    conditions.push(to.includes(message.to));
+  }
   if (subtype) {
-    conditions.push(subtype === message.subtype);
+    conditions.push(subtype.includes(message.subtype));
   }
 
   return conditions.every((condition) => condition);
