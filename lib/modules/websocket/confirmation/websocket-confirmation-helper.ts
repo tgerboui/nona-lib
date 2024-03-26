@@ -18,11 +18,17 @@ export function messageMapper(message: unknown): ConfirmationMessage {
   };
 }
 
-export function messageFilter(message: ConfirmationMessage, params: ConfirmationFilter): boolean {
-  const isAccountsIncluded =
-    params.accounts.includes(message.from) || params.accounts.includes(message.to);
-  if (params.subtype) {
-    return isAccountsIncluded && params.subtype === message.subtype;
+export function messageFilter(message: ConfirmationMessage, filter?: ConfirmationFilter): boolean {
+  if (!filter) return true;
+
+  const { accounts, subtype } = filter;
+  const conditions: boolean[] = [];
+  if (accounts) {
+    conditions.push(accounts.includes(message.from) || accounts.includes(message.to));
   }
-  return isAccountsIncluded;
+  if (subtype) {
+    conditions.push(subtype === message.subtype);
+  }
+
+  return conditions.every((condition) => condition);
 }

@@ -8,7 +8,7 @@ import { NonaWebSocket } from './websocket/websocket';
 export class Nona {
   private rpc: Rpc;
 
-  public websocket: NonaWebSocket;
+  public webSocket: NonaWebSocket;
   public blocks: Blocks;
   public accounts: Accounts;
   public key: Key;
@@ -16,10 +16,10 @@ export class Nona {
   // TODO: Set options in interface
   constructor(url = 'http://localhost:7076', webSocketUrl = 'ws://localhost:7078') {
     this.rpc = new Rpc({ url });
-    this.websocket = new NonaWebSocket({ url: webSocketUrl });
+    this.webSocket = new NonaWebSocket({ url: webSocketUrl });
     this.blocks = new Blocks(this.rpc);
     this.key = new Key(this.rpc);
-    this.accounts = new Accounts(this.rpc, this.websocket);
+    this.accounts = new Accounts(this.rpc, this.webSocket);
   }
 
   account(privateKey: string): Account {

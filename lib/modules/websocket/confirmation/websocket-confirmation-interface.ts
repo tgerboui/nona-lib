@@ -3,7 +3,7 @@ export interface WebSocketConfirmationParams {
   next: (message: ConfirmationMessage) => unknown;
   complete?: () => unknown;
   error?: (error: unknown) => unknown;
-  filter: ConfirmationFilter;
+  filter?: ConfirmationFilter;
 }
 
 export interface WebSocketUpdateConfirmationParams {
@@ -24,6 +24,6 @@ export interface ConfirmationMessage {
 }
 
 export interface ConfirmationFilter {
-  accounts: string[];
+  accounts?: string[];
   subtype?: string;
 }

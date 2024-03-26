@@ -8,29 +8,26 @@ import {
 } from './websocket-confirmation-interface';
 import { messageFilter, messageMapper } from './websocket-confirmation-helper';
 
+// TODO: Really need tests here
 export class WebSocketConfirmation {
   private accountListened = new Map<string, number>();
   private observable: Observable<unknown>;
   private subscriptionCount = 0;
+  private subscriptionToAll = 0;
 
   constructor(private webSocketManager: WebSocketManager) {
     this.observable = this.webSocketManager.subjectTopic('confirmation');
   }
 
   subscribe(params: WebSocketConfirmationParams): Subscription {
-    const {
-      filter: { accounts },
-      next,
-      error,
-      complete,
-    } = params;
+    const { next, error, complete } = params;
 
-    this.addSubscription(accounts);
+    this.addSubscription(params.filter?.accounts);
     return this.observable
       .pipe(
         map<unknown, ConfirmationMessage>((message) => messageMapper(message)),
         filter<ConfirmationMessage>((message) => messageFilter(message, params.filter)),
-        finalize(() => this.removeSubscription(accounts)),
+        finalize(() => this.removeSubscription(params.filter?.accounts)),
       )
       .subscribe({
         next,
@@ -39,24 +36,42 @@ export class WebSocketConfirmation {
       });
   }
 
-  private addSubscription(accounts: string[]) {
-    const addedAccount = this.addAccountsToListened(accounts);
+  private addSubscription(accounts?: string[]): void {
     if (this.subscriptionCount === 0) {
-      this.subscribeWebsocket(accounts);
+      this.subscribeWebSocket(accounts);
+    }
+
+    if (accounts) {
+      const addedAccount = this.addAccountsToListened(accounts);
+      if (this.subscriptionCount > 0 && this.subscriptionToAll === 0) {
+        this.updateWebSocket({
+          accountsAdd: addedAccount,
+        });
+      }
     } else {
-      this.updateWebsocket({
-        accountsAdd: addedAccount,
-      });
+      if (this.subscriptionToAll === 0 && this.subscriptionCount > 0) {
+        this.subscribeWebSocket();
+      }
+      this.subscriptionToAll += 1;
     }
 
     this.subscriptionCount += 1;
   }
 
-  private removeSubscription(accounts: string[]) {
-    const accountsRemoved = this.removeAccountsFromListened(accounts);
-    this.updateWebsocket({ accountsDel: accountsRemoved });
-    this.subscriptionCount -= 1;
+  private removeSubscription(accounts?: string[]): void {
+    if (accounts) {
+      const accountsRemoved = this.removeAccountsFromListened(accounts);
+      if (this.subscriptionToAll === 0) {
+        this.updateWebSocket({ accountsDel: accountsRemoved });
+      }
+    } else {
+      this.subscriptionToAll -= 1;
+      if (this.subscriptionToAll === 0 && this.subscriptionCount > 0) {
+        this.subscribeWebSocket(Array.from(this.accountListened.keys()));
+      }
+    }
 
+    this.subscriptionCount -= 1;
     if (this.subscriptionCount === 0) {
       this.unsubscribeWebsocket();
     }
@@ -96,16 +111,18 @@ export class WebSocketConfirmation {
     return accountRemoved;
   }
 
-  private subscribeWebsocket(accounts: string[]) {
+  private subscribeWebSocket(accounts?: string[]): void {
     this.webSocketManager.subscribeTopic({
       topic: 'confirmation',
-      options: {
-        accounts,
-      },
+      options: accounts
+        ? {
+            accounts,
+          }
+        : undefined,
     });
   }
 
-  private updateWebsocket({ accountsAdd, accountsDel }: WebSocketUpdateConfirmationParams) {
+  private updateWebSocket({ accountsAdd, accountsDel }: WebSocketUpdateConfirmationParams) {
     this.webSocketManager.updateTopic({
       topic: 'confirmation',
       options: {
@@ -115,7 +132,7 @@ export class WebSocketConfirmation {
     });
   }
 
-  private unsubscribeWebsocket() {
+  private unsubscribeWebsocket(): void {
     this.webSocketManager.unsubscribeTopic('confirmation');
   }
 }
