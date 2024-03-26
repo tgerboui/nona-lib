@@ -4,6 +4,7 @@ import { AccountKeys } from './key-interface';
 import { Keys } from './key-schema';
 
 export class Key extends RpcConsummer {
+  // TODO: Add options to set seed
   async create(): Promise<AccountKeys> {
     const keys = await this.rpc.call('key_create');
 
