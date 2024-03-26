@@ -1,7 +1,10 @@
 import BigNumber from 'bignumber.js';
+import { Subscription } from 'rxjs';
+
 import { KeyService } from '../../services/hash/key-service';
 import { Accounts } from '../accounts/accounts';
 import {
+  ListenConfirmationParams,
   Receivable,
   ReceivableHasheBlocks,
   ReceivableOptions,
@@ -44,8 +47,8 @@ export class Account extends RpcConsummer {
   }
 
   // TODO: Set parameters in interface
-  async info(representative: true): Promise<AccountInfoRepresentative>;
-  async info(representative: boolean): Promise<AccountInfo>;
+  async info(representative?: true): Promise<AccountInfoRepresentative>;
+  async info(representative?: boolean): Promise<AccountInfo>;
   async info(representative = false): Promise<AccountInfo> {
     return this.accounts.info(this.account, representative);
   }
@@ -152,8 +155,7 @@ export class Account extends RpcConsummer {
     const info = await this.info(true);
     const balance = new BigNumber(info.balance);
     // Convert nano amout to raw amount
-    // TODO: Create a converter
-    const rawAmount = UnitService.rawToNano(amount);
+    const rawAmount = UnitService.nanoToRaw(amount);
     console.log('rawAmount:', rawAmount.toString(10));
 
     if (balance.isLessThan(amount)) {
@@ -179,5 +181,9 @@ export class Account extends RpcConsummer {
 
   public async rawBalance() {
     return this.accounts.rawBalance(this.account);
+  }
+
+  public listenConfirmation(params: ListenConfirmationParams): Subscription {
+    return this.accounts.listenConfirmation([this.account], params);
   }
 }

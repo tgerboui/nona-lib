@@ -3,11 +3,7 @@ import { Rpc } from '../../services/rpc/rpc';
 import { rpcError } from './rpc-consumer-schema';
 
 export class RpcConsummer {
-  rpc: Rpc;
-
-  constructor(rpc: Rpc) {
-    this.rpc = rpc;
-  }
+  constructor(protected rpc: Rpc) {}
 
   // TODO: Create class for errors
   parseHandler<T>(data: unknown, schema: z.Schema<T>): T {

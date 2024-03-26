@@ -1,6 +1,7 @@
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import {
   AccountBalance,
+  ListenConfirmationParams,
   Receivable,
   ReceivableHasheBlocks,
   ReceivableOptions,
@@ -16,8 +17,15 @@ import {
   ReceivableValues,
 } from './accounts-shemas';
 import { UnitService } from '../../services/unit/unit-service';
+import { Rpc } from '../../services/rpc/rpc';
+import { Subscription } from 'rxjs';
+import { NonaWebSocket } from '../websocket/websocket';
 
 export class Accounts extends RpcConsummer {
+  constructor(rpc: Rpc, private websocket: NonaWebSocket) {
+    super(rpc);
+  }
+
   public async receivable(options: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
   public async receivable(options: ReceivableOptionsSorted): Promise<ReceivableValueBlocks>;
   public async receivable(optiosn: ReceivableOptions): Promise<Receivable>;
@@ -67,5 +75,12 @@ export class Accounts extends RpcConsummer {
       pending: UnitService.rawToNano(pending).toString(10),
       receivable: UnitService.rawToNano(receivable).toString(10),
     };
+  }
+
+  public listenConfirmation(accounts: string[], params: ListenConfirmationParams): Subscription {
+    return this.websocket.confirmation.subscribe({
+      ...params,
+      filter: { ...params.filter, accounts },
+    });
   }
 }

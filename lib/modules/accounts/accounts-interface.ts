@@ -1,3 +1,8 @@
+import {
+  ConfirmationFilter,
+  WebSocketConfirmationParams,
+} from '../websocket/confirmation/websocket-confirmation-interface';
+
 export interface ReceivableOptions {
   account: string;
   count?: number;
@@ -23,3 +28,7 @@ export interface AccountBalance {
   pending: string;
   receivable: string;
 }
+
+export type ListenConfirmationParams = Omit<WebSocketConfirmationParams, 'filter'> & {
+  filter?: Omit<ConfirmationFilter, 'accounts'>;
+};
