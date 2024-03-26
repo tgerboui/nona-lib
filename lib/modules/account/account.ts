@@ -15,7 +15,7 @@ import {
 import { AccountInfo, AccountInfoRepresentative } from '../accounts/accounts-shemas';
 import { Blocks } from '../blocks/blocks';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { AccountOptions } from './account-interface';
+import { AccountListAndReceiveParams, AccountOptions } from './account-interface';
 import { UnitService } from '../../services/unit/unit-service';
 
 export class Account extends RpcConsummer {
@@ -185,5 +185,22 @@ export class Account extends RpcConsummer {
 
   public listenConfirmation(params: ListenConfirmationParams): Subscription {
     return this.accounts.listenConfirmation([this.account], params);
+  }
+
+  public listenAndReceive(params?: AccountListAndReceiveParams): Subscription {
+    return this.listenConfirmation({
+      next: (message) => {
+        params?.next && params?.next(message);
+        // Receive the transaction
+        this.receive(message.hash);
+      },
+      error: params?.error,
+      complete: params?.complete,
+      // Only listen to send transactions to this account
+      filter: {
+        to: [this.account],
+        subtype: ['send'],
+      },
+    });
   }
 }
