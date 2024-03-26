@@ -151,12 +151,11 @@ export class Account extends RpcConsummer {
   }
 
   // TODO: Create send raw and add string to parameters
-  public async send(address: string, amount: number): Promise<string> {
+  public async send(address: string, amount: number | string): Promise<string> {
     const info = await this.info(true);
     const balance = new BigNumber(info.balance);
     // Convert nano amout to raw amount
     const rawAmount = UnitService.nanoToRaw(amount);
-    console.log('rawAmount:', rawAmount.toString(10));
 
     if (balance.isLessThan(amount)) {
       throw new Error('Insufficient balance');
@@ -187,6 +186,7 @@ export class Account extends RpcConsummer {
     return this.accounts.listenConfirmation([this.account], params);
   }
 
+  // The account need to be opened to receive transactions
   public listenAndReceive(params?: AccountListAndReceiveParams): Subscription {
     return this.listenConfirmation({
       next: (message) => {
