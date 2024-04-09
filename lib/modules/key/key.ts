@@ -21,7 +21,7 @@ export class Key extends RpcConsummer {
     return {
       privateKey: privateKey,
       publicKey: KeyService.getPublicKey(privateKey),
-      account: KeyService.getAccount(KeyService.getPublicKey(privateKey)),
+      account: KeyService.getAddress(KeyService.getPublicKey(privateKey)),
     };
   }
 }

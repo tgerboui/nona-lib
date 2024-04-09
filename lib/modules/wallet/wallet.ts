@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { Subscription } from 'rxjs';
 
 import { KeyService } from '../../services/hash/key-service';
-import { Accounts } from '../accounts/accounts';
+import { Account } from '../account/account';
 import {
   AccountHistoryParams,
   ListenConfirmationParams,
@@ -12,32 +12,28 @@ import {
   ReceivableOptionsSorted,
   ReceivableOptionsUnsorted,
   ReceivableValueBlocks,
-} from '../accounts/accounts-interface';
-import {
-  AccountHistory,
-  AccountInfo,
-  AccountInfoRepresentative,
-} from '../accounts/accounts-shemas';
+} from '../account/account-interface';
+import { AccountHistory, AccountInfo, AccountInfoRepresentative } from '../account/account-shemas';
 import { Blocks } from '../blocks/blocks';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { WalletListAndReceiveParams, WalletOptions } from './wallet-interface';
 import { UnitService } from '../../services/unit/unit-service';
 
 export class Wallet extends RpcConsummer {
-  private accounts: Accounts;
+  private account: Account;
   private blocks: Blocks;
 
   privateKey: string;
   publicKey: string;
-  account: string;
+  address: string;
 
-  constructor({ rpc, accounts, privateKey, blocks }: WalletOptions) {
+  constructor({ rpc, account, privateKey, blocks }: WalletOptions) {
     super(rpc);
-    this.accounts = accounts;
+    this.account = account;
     this.privateKey = privateKey;
     this.blocks = blocks;
     this.publicKey = KeyService.getPublicKey(privateKey);
-    this.account = KeyService.getAccount(this.publicKey);
+    this.address = KeyService.getAddress(this.publicKey);
   }
 
   public receivable(
@@ -48,14 +44,14 @@ export class Wallet extends RpcConsummer {
   ): Promise<ReceivableValueBlocks>;
   public receivable(options: Omit<ReceivableOptions, 'account'>): Promise<Receivable>;
   public receivable(options: Omit<ReceivableOptions, 'account'>): Promise<Receivable> {
-    return this.accounts.receivable({ ...options, account: this.account });
+    return this.account.receivable({ ...options, account: this.address });
   }
 
   // TODO: Set parameters in interface
   async info(representative?: true): Promise<AccountInfoRepresentative>;
   async info(representative?: boolean): Promise<AccountInfo>;
   async info(representative = false): Promise<AccountInfo> {
-    return this.accounts.info(this.account, representative);
+    return this.account.info(this.address, representative);
   }
 
   // TODO: Implement optional hash
@@ -73,7 +69,7 @@ export class Wallet extends RpcConsummer {
     const block = await this.blocks.create({
       previous: '0',
       representative,
-      account: this.account,
+      account: this.address,
       link: hash,
       balance: hashValue,
       key: this.privateKey,
@@ -103,7 +99,7 @@ export class Wallet extends RpcConsummer {
 
     // Generate work and format block
     const block = await this.blocks.create({
-      account: this.account,
+      account: this.address,
       previous: info.frontier,
       representative: info.representative,
       balance: finalBalance.toString(10),
@@ -126,7 +122,7 @@ export class Wallet extends RpcConsummer {
       balance = balance.plus(hashInfo.amount);
 
       const block = await this.blocks.create({
-        account: this.account,
+        account: this.address,
         previous: previous,
         representative: info.representative,
         balance: balance.toString(10),
@@ -168,7 +164,7 @@ export class Wallet extends RpcConsummer {
 
     // TODO: Maybe set create block in a function in this class
     const block = await this.blocks.create({
-      account: this.account,
+      account: this.address,
       previous: info.frontier,
       representative: info.representative,
       balance: balance.minus(rawAmount).toString(10),
@@ -180,15 +176,15 @@ export class Wallet extends RpcConsummer {
   }
 
   public async balance() {
-    return this.accounts.balance(this.account);
+    return this.account.balance(this.address);
   }
 
   public async rawBalance() {
-    return this.accounts.rawBalance(this.account);
+    return this.account.rawBalance(this.address);
   }
 
   public listenConfirmation(params: ListenConfirmationParams): Subscription {
-    return this.accounts.listenConfirmation([this.account], params);
+    return this.account.listenConfirmation([this.address], params);
   }
 
   // The account need to be opened to receive transactions
@@ -203,13 +199,13 @@ export class Wallet extends RpcConsummer {
       complete: params?.complete,
       // Only listen to send transactions to this account
       filter: {
-        to: [this.account],
+        to: [this.address],
         subtype: ['send'],
       },
     });
   }
 
   public history(params?: AccountHistoryParams): Promise<AccountHistory> {
-    return this.accounts.history(this.account, params);
+    return this.account.history(this.address, params);
   }
 }

@@ -1,6 +1,6 @@
 import { Rpc } from '../services/rpc/rpc';
 import { Wallet } from './wallet/wallet';
-import { Accounts } from './accounts/accounts';
+import { Account } from './account/account';
 import { Blocks } from './blocks/blocks';
 import { Key } from './key/key';
 import { NonaWebSocket } from './websocket/websocket';
@@ -10,7 +10,7 @@ export class Nona {
 
   public webSocket: NonaWebSocket;
   public blocks: Blocks;
-  public accounts: Accounts;
+  public account: Account;
   public key: Key;
 
   // TODO: Set options in interface
@@ -19,14 +19,14 @@ export class Nona {
     this.webSocket = new NonaWebSocket({ url: webSocketUrl });
     this.blocks = new Blocks(this.rpc);
     this.key = new Key(this.rpc);
-    this.accounts = new Accounts(this.rpc, this.webSocket);
+    this.account = new Account(this.rpc, this.webSocket);
   }
 
   wallet(privateKey: string): Wallet {
     return new Wallet({
       rpc: this.rpc,
       blocks: this.blocks,
-      accounts: this.accounts,
+      account: this.account,
       privateKey,
     });
   }

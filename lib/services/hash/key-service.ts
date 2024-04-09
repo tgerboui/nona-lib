@@ -5,7 +5,7 @@ export class KeyService {
     return derivePublicKey(privateKey);
   }
 
-  static getAccount(publicKey: string) {
+  static getAddress(publicKey: string) {
     return deriveAddress(publicKey, {
       useNanoPrefix: true,
     });

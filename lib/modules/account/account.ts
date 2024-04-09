@@ -9,7 +9,7 @@ import {
   ReceivableOptionsSorted,
   ReceivableOptionsUnsorted,
   ReceivableValueBlocks,
-} from './accounts-interface';
+} from './account-interface';
 import {
   AccountHistory,
   AccountInfo,
@@ -17,13 +17,13 @@ import {
   AccountRawBalance,
   ReceivableHashes,
   ReceivableValues,
-} from './accounts-shemas';
+} from './account-shemas';
 import { UnitService } from '../../services/unit/unit-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { Subscription } from 'rxjs';
 import { NonaWebSocket } from '../websocket/websocket';
 
-export class Accounts extends RpcConsummer {
+export class Account extends RpcConsummer {
   constructor(rpc: Rpc, private websocket: NonaWebSocket) {
     super(rpc);
   }

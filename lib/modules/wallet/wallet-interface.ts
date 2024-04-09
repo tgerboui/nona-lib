@@ -1,11 +1,11 @@
 import { Rpc } from '../../services/rpc/rpc';
-import { Accounts } from '../accounts/accounts';
+import { Account } from '../account/account';
 import { Blocks } from '../blocks/blocks';
 import { ConfirmationMessage } from '../websocket/confirmation/websocket-confirmation-interface';
 
 export interface WalletOptions {
   rpc: Rpc;
-  accounts: Accounts;
+  account: Account;
   privateKey: string;
   blocks: Blocks;
 }
