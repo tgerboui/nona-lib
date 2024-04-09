@@ -17,6 +17,7 @@ import {
   AccountRawBalance,
   ReceivableHashes,
   ReceivableValues,
+  accountBlockCountSchema,
 } from './account-shemas';
 import { UnitService } from '../../services/unit/unit-service';
 import { Rpc } from '../../services/rpc/rpc';
@@ -89,5 +90,18 @@ export class Account extends RpcConsummer {
     const res = await this.rpc.call('account_history', { account: this.account, ...params, count });
 
     return this.parseHandler(res, AccountHistory);
+  }
+
+  public async blockCount(): Promise<number> {
+    const res = await this.rpc.call('account_block_count', { account: this.account });
+    const count = this.parseHandler(res, accountBlockCountSchema).block_count;
+
+    return parseInt(count, 10);
+  }
+
+  public async representative(): Promise<string> {
+    const { representative } = await this.info(true);
+
+    return representative;
   }
 }

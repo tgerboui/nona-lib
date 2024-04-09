@@ -51,3 +51,7 @@ export const AccountHistory = z.object({
   next: z.string().optional(),
 });
 export type AccountHistory = z.infer<typeof AccountHistory>;
+
+export const accountBlockCountSchema = z.object({
+  block_count: z.string(),
+});
