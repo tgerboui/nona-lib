@@ -18,4 +18,12 @@ export class UnitService {
 
     return rawNumber.shiftedBy(-30);
   }
+
+  public static nanoToRawString(nano: string | number | BigNumber): string {
+    return UnitService.nanoToRaw(nano).toString(10);
+  }
+
+  public static rawToNanoString(raw: string | number | BigNumber): string {
+    return UnitService.rawToNano(raw).toString(10);
+  }
 }

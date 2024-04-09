@@ -32,3 +32,14 @@ export interface AccountBalance {
 export type ListenConfirmationParams = Omit<WebSocketConfirmationParams, 'filter'> & {
   filter?: Omit<ConfirmationFilter, 'accounts'>;
 };
+
+// TODO: Docs
+export interface AccountHistoryParams {
+  count?: number; /// Default 100
+  head?: string;
+  offset?: number;
+  reverse?: boolean;
+  account_filter?: string[];
+  // TODO: Handle raw format
+  // raw?: string;
+}

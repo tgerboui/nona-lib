@@ -1,6 +1,7 @@
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import {
   AccountBalance,
+  AccountHistoryParams,
   ListenConfirmationParams,
   Receivable,
   ReceivableHasheBlocks,
@@ -10,6 +11,7 @@ import {
   ReceivableValueBlocks,
 } from './accounts-interface';
 import {
+  AccountHistory,
   AccountInfo,
   AccountInfoRepresentative,
   AccountRawBalance,
@@ -70,6 +72,7 @@ export class Accounts extends RpcConsummer {
   public async balance(account: string): Promise<AccountBalance> {
     const { balance, pending, receivable } = await this.rawBalance(account);
 
+    // TODO: Set this in the schema
     return {
       balance: UnitService.rawToNano(balance).toString(10),
       pending: UnitService.rawToNano(pending).toString(10),
@@ -82,5 +85,14 @@ export class Accounts extends RpcConsummer {
       ...params,
       filter: { ...params.filter, accounts },
     });
+  }
+
+  public async history(
+    account: string,
+    { count = 100, ...params }: AccountHistoryParams = {},
+  ): Promise<AccountHistory> {
+    const res = await this.rpc.call('account_history', { account, ...params, count });
+
+    return this.parseHandler(res, AccountHistory);
   }
 }

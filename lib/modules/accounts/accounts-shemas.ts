@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { UnitService } from '../../services/unit/unit-service';
+
 export const ReceivableValues = z.object({
   blocks: z.record(z.string()).or(z.string()),
 });
@@ -33,3 +35,19 @@ export const AccountRawBalance = z.object({
   receivable: z.string(),
 });
 export type AccountRawBalance = z.infer<typeof AccountRawBalance>;
+
+export const AccountHistory = z.object({
+  history: z.array(
+    z.object({
+      type: z.string(),
+      account: z.string(),
+      amount: z.string().transform(UnitService.rawToNanoString),
+      hash: z.string(),
+      local_timestamp: z.string(),
+      height: z.string(),
+    }),
+  ),
+  previous: z.string().optional(),
+  next: z.string().optional(),
+});
+export type AccountHistory = z.infer<typeof AccountHistory>;

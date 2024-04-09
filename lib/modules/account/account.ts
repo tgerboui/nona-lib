@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { KeyService } from '../../services/hash/key-service';
 import { Accounts } from '../accounts/accounts';
 import {
+  AccountHistoryParams,
   ListenConfirmationParams,
   Receivable,
   ReceivableHasheBlocks,
@@ -12,7 +13,11 @@ import {
   ReceivableOptionsUnsorted,
   ReceivableValueBlocks,
 } from '../accounts/accounts-interface';
-import { AccountInfo, AccountInfoRepresentative } from '../accounts/accounts-shemas';
+import {
+  AccountHistory,
+  AccountInfo,
+  AccountInfoRepresentative,
+} from '../accounts/accounts-shemas';
 import { Blocks } from '../blocks/blocks';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { AccountListAndReceiveParams, AccountOptions } from './account-interface';
@@ -202,5 +207,9 @@ export class Account extends RpcConsummer {
         subtype: ['send'],
       },
     });
+  }
+
+  public history(params?: AccountHistoryParams): Promise<AccountHistory> {
+    return this.accounts.history(this.account, params);
   }
 }
