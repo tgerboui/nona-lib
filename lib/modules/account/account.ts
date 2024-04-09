@@ -50,7 +50,6 @@ export class Account extends RpcConsummer {
   }
 
   public async info(representative: true): Promise<AccountInfoRepresentative>;
-  public async info(representative: true): Promise<AccountInfoRepresentative>;
   public async info(representative: boolean): Promise<AccountInfo>;
   public async info(representative = false): Promise<AccountInfo> {
     const res = await this.rpc.call('account_info', { account: this.account, representative });
