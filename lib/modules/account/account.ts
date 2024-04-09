@@ -18,6 +18,7 @@ import {
   ReceivableHashes,
   ReceivableValues,
   accountBlockCountSchema,
+  accountWeightSchema,
 } from './account-shemas';
 import { UnitService } from '../../services/unit/unit-service';
 import { Rpc } from '../../services/rpc/rpc';
@@ -103,5 +104,10 @@ export class Account extends RpcConsummer {
     const { representative } = await this.info(true);
 
     return representative;
+  }
+
+  public async weight(): Promise<string> {
+    const res = await this.rpc.call('account_weight', { account: this.account });
+    return this.parseHandler(res, accountWeightSchema).weight;
   }
 }

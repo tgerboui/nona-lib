@@ -55,3 +55,7 @@ export type AccountHistory = z.infer<typeof AccountHistory>;
 export const accountBlockCountSchema = z.object({
   block_count: z.string(),
 });
+
+export const accountWeightSchema = z.object({
+  weight: z.string().transform(UnitService.rawToNanoString),
+});
