@@ -4,7 +4,6 @@ import {
 } from '../websocket/confirmation/websocket-confirmation-interface';
 
 export interface ReceivableOptions {
-  account: string;
   count?: number;
   sort?: boolean;
 }

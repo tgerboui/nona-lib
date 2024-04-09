@@ -3,55 +3,31 @@ import { Subscription } from 'rxjs';
 
 import { KeyService } from '../../services/hash/key-service';
 import { Account } from '../account/account';
-import {
-  AccountHistoryParams,
-  ListenConfirmationParams,
-  Receivable,
-  ReceivableHasheBlocks,
-  ReceivableOptions,
-  ReceivableOptionsSorted,
-  ReceivableOptionsUnsorted,
-  ReceivableValueBlocks,
-} from '../account/account-interface';
-import { AccountHistory, AccountInfo, AccountInfoRepresentative } from '../account/account-shemas';
 import { Blocks } from '../blocks/blocks';
-import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { WalletListAndReceiveParams, WalletOptions } from './wallet-interface';
+import { WalletListAndReceiveParams } from './wallet-interface';
 import { UnitService } from '../../services/unit/unit-service';
+import { Rpc } from '../../services/rpc/rpc';
+import { NonaWebSocket } from '../websocket/websocket';
 
-export class Wallet extends RpcConsummer {
-  private account: Account;
-  private blocks: Blocks;
+export class Wallet extends Account {
+  public publicKey: string;
+  public address: string;
 
-  privateKey: string;
-  publicKey: string;
-  address: string;
+  // TODO: Change this interface
+  constructor(
+    private privateKey: string,
+    private blocks: Blocks,
+    rpc: Rpc,
+    websocket: NonaWebSocket,
+  ) {
+    const publicKey = KeyService.getPublicKey(privateKey);
+    const address = KeyService.getAddress(publicKey);
 
-  constructor({ rpc, account, privateKey, blocks }: WalletOptions) {
-    super(rpc);
-    this.account = account;
+    super(address, websocket, rpc);
+
     this.privateKey = privateKey;
-    this.blocks = blocks;
-    this.publicKey = KeyService.getPublicKey(privateKey);
-    this.address = KeyService.getAddress(this.publicKey);
-  }
-
-  public receivable(
-    options: Omit<ReceivableOptionsUnsorted, 'account'>,
-  ): Promise<ReceivableHasheBlocks>;
-  public receivable(
-    options: Omit<ReceivableOptionsSorted, 'account'>,
-  ): Promise<ReceivableValueBlocks>;
-  public receivable(options: Omit<ReceivableOptions, 'account'>): Promise<Receivable>;
-  public receivable(options: Omit<ReceivableOptions, 'account'>): Promise<Receivable> {
-    return this.account.receivable({ ...options, account: this.address });
-  }
-
-  // TODO: Set parameters in interface
-  async info(representative?: true): Promise<AccountInfoRepresentative>;
-  async info(representative?: boolean): Promise<AccountInfo>;
-  async info(representative = false): Promise<AccountInfo> {
-    return this.account.info(this.address, representative);
+    this.publicKey = publicKey;
+    this.address = address;
   }
 
   // TODO: Implement optional hash
@@ -175,18 +151,6 @@ export class Wallet extends RpcConsummer {
     return this.blocks.process(block, 'send');
   }
 
-  public async balance() {
-    return this.account.balance(this.address);
-  }
-
-  public async rawBalance() {
-    return this.account.rawBalance(this.address);
-  }
-
-  public listenConfirmation(params: ListenConfirmationParams): Subscription {
-    return this.account.listenConfirmation([this.address], params);
-  }
-
   // The account need to be opened to receive transactions
   public listenAndReceive(params?: WalletListAndReceiveParams): Subscription {
     return this.listenConfirmation({
@@ -203,9 +167,5 @@ export class Wallet extends RpcConsummer {
         subtype: ['send'],
       },
     });
-  }
-
-  public history(params?: AccountHistoryParams): Promise<AccountHistory> {
-    return this.account.history(this.address, params);
   }
 }

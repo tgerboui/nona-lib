@@ -10,24 +10,22 @@ export class Nona {
 
   public webSocket: NonaWebSocket;
   public blocks: Blocks;
-  public account: Account;
   public key: Key;
 
   // TODO: Set options in interface
+  // TODO: Set default values in interface
   constructor(url = 'http://localhost:7076', webSocketUrl = 'ws://localhost:7078') {
     this.rpc = new Rpc({ url });
     this.webSocket = new NonaWebSocket({ url: webSocketUrl });
     this.blocks = new Blocks(this.rpc);
     this.key = new Key(this.rpc);
-    this.account = new Account(this.rpc, this.webSocket);
   }
 
-  wallet(privateKey: string): Wallet {
-    return new Wallet({
-      rpc: this.rpc,
-      blocks: this.blocks,
-      account: this.account,
-      privateKey,
-    });
+  public account(account: string): Account {
+    return new Account(account, this.webSocket, this.rpc);
+  }
+
+  public wallet(privateKey: string): Wallet {
+    return new Wallet(privateKey, this.blocks, this.rpc, this.webSocket);
   }
 }

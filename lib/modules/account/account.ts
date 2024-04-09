@@ -24,20 +24,16 @@ import { Subscription } from 'rxjs';
 import { NonaWebSocket } from '../websocket/websocket';
 
 export class Account extends RpcConsummer {
-  constructor(rpc: Rpc, private websocket: NonaWebSocket) {
+  constructor(private account: string, private websocket: NonaWebSocket, rpc: Rpc) {
     super(rpc);
   }
 
   public async receivable(options: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
   public async receivable(options: ReceivableOptionsSorted): Promise<ReceivableValueBlocks>;
   public async receivable(options: ReceivableOptions): Promise<Receivable>;
-  public async receivable({
-    account,
-    count = 100,
-    sort = false,
-  }: ReceivableOptions): Promise<Receivable> {
+  public async receivable({ count = 100, sort = false }: ReceivableOptions): Promise<Receivable> {
     const receivable = await this.rpc.call('receivable', {
-      account,
+      account: this.account,
       count: count?.toString() ?? undefined,
       sorting: sort,
     });
@@ -53,24 +49,24 @@ export class Account extends RpcConsummer {
     return blocksArray;
   }
 
-  public async info(account: string, representative: true): Promise<AccountInfoRepresentative>;
-  public async info(account: string, representative: true): Promise<AccountInfoRepresentative>;
-  public async info(account: string, representative: boolean): Promise<AccountInfo>;
-  public async info(account: string, representative = false): Promise<AccountInfo> {
-    const res = await this.rpc.call('account_info', { account, representative });
+  public async info(representative: true): Promise<AccountInfoRepresentative>;
+  public async info(representative: true): Promise<AccountInfoRepresentative>;
+  public async info(representative: boolean): Promise<AccountInfo>;
+  public async info(representative = false): Promise<AccountInfo> {
+    const res = await this.rpc.call('account_info', { account: this.account, representative });
 
     return this.parseHandler(res, AccountInfo);
   }
 
-  public async rawBalance(account: string): Promise<AccountRawBalance> {
-    const res = await this.rpc.call('account_balance', { account });
+  public async rawBalance(): Promise<AccountRawBalance> {
+    const res = await this.rpc.call('account_balance', { account: this.account });
 
     return this.parseHandler(res, AccountRawBalance);
   }
 
   // TODO: Explain why string and warn about converting to number
-  public async balance(account: string): Promise<AccountBalance> {
-    const { balance, pending, receivable } = await this.rawBalance(account);
+  public async balance(): Promise<AccountBalance> {
+    const { balance, pending, receivable } = await this.rawBalance();
 
     // TODO: Set this in the schema
     return {
@@ -80,18 +76,18 @@ export class Account extends RpcConsummer {
     };
   }
 
-  public listenConfirmation(accounts: string[], params: ListenConfirmationParams): Subscription {
+  public listenConfirmation(params: ListenConfirmationParams): Subscription {
     return this.websocket.confirmation.subscribe({
       ...params,
-      filter: { ...params.filter, accounts },
+      filter: { ...params.filter, accounts: [this.account] },
     });
   }
 
-  public async history(
-    account: string,
-    { count = 100, ...params }: AccountHistoryParams = {},
-  ): Promise<AccountHistory> {
-    const res = await this.rpc.call('account_history', { account, ...params, count });
+  public async history({
+    count = 100,
+    ...params
+  }: AccountHistoryParams = {}): Promise<AccountHistory> {
+    const res = await this.rpc.call('account_history', { account: this.account, ...params, count });
 
     return this.parseHandler(res, AccountHistory);
   }

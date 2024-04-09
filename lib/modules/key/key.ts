@@ -17,7 +17,7 @@ export class Key extends RpcConsummer {
     };
   }
 
-  async expand(privateKey: string): Promise<AccountKeys> {
+  expand(privateKey: string): AccountKeys {
     return {
       privateKey: privateKey,
       publicKey: KeyService.getPublicKey(privateKey),
