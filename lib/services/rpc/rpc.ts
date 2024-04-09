@@ -9,7 +9,7 @@ export class Rpc {
     });
   }
 
-  async call(action: string, body?: object): Promise<object> {
+  async call(action: string, body?: object): Promise<unknown> {
     // TODO: Handle error
     const res = await this.instance.post('/', {
       action,

@@ -6,8 +6,7 @@ import { Key } from './key/key';
 import { NonaWebSocket } from './websocket/websocket';
 
 export class Nona {
-  private rpc: Rpc;
-
+  public rpc: Rpc;
   public webSocket: NonaWebSocket;
   public blocks: Blocks;
   public key: Key;
