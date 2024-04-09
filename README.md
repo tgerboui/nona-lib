@@ -22,4 +22,5 @@ Information about the project's license.
 - [ ] Review names account and accounts
 - [ ] Websocket support
 - [ ] Work server options
+- [ ] Check integration with nano.to
 - [ ] Tests
