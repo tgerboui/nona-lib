@@ -168,4 +168,19 @@ export class Wallet extends Account {
       },
     });
   }
+
+  public async change(representative: string): Promise<string> {
+    const info = await this.info();
+
+    const block = await this.blocks.create({
+      account: this.address,
+      previous: info.frontier,
+      representative: representative,
+      balance: info.balance,
+      link: '0',
+      key: this.privateKey,
+    });
+
+    return this.blocks.process(block, 'change');
+  }
 }
