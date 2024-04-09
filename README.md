@@ -19,7 +19,10 @@ Information about the project's license.
 ## TODO
 
 - [ ] Change options to params in params methods
-- [ ] Review names account and accounts
+- [ ] Handle errors
+  - [ ] Handle connection errors
+  - [ ] Handle format errors
+  - [ ] Handle response errors from the node
 - [ ] Websocket support
 - [ ] Work server options
 - [ ] Check integration with nano.to
