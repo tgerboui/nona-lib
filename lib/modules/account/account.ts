@@ -30,7 +30,7 @@ export class Account extends RpcConsummer {
 
   public async receivable(options: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
   public async receivable(options: ReceivableOptionsSorted): Promise<ReceivableValueBlocks>;
-  public async receivable(optiosn: ReceivableOptions): Promise<Receivable>;
+  public async receivable(options: ReceivableOptions): Promise<Receivable>;
   public async receivable({
     account,
     count = 100,
