@@ -20,10 +20,10 @@ import {
 } from '../accounts/accounts-shemas';
 import { Blocks } from '../blocks/blocks';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { AccountListAndReceiveParams, AccountOptions } from './account-interface';
+import { WalletListAndReceiveParams, WalletOptions } from './wallet-interface';
 import { UnitService } from '../../services/unit/unit-service';
 
-export class Account extends RpcConsummer {
+export class Wallet extends RpcConsummer {
   private accounts: Accounts;
   private blocks: Blocks;
 
@@ -31,7 +31,7 @@ export class Account extends RpcConsummer {
   publicKey: string;
   account: string;
 
-  constructor({ rpc, accounts, privateKey, blocks }: AccountOptions) {
+  constructor({ rpc, accounts, privateKey, blocks }: WalletOptions) {
     super(rpc);
     this.accounts = accounts;
     this.privateKey = privateKey;
@@ -192,7 +192,7 @@ export class Account extends RpcConsummer {
   }
 
   // The account need to be opened to receive transactions
-  public listenAndReceive(params?: AccountListAndReceiveParams): Subscription {
+  public listenAndReceive(params?: WalletListAndReceiveParams): Subscription {
     return this.listenConfirmation({
       next: (message) => {
         params?.next && params?.next(message);

@@ -1,5 +1,5 @@
 import { Rpc } from '../services/rpc/rpc';
-import { Account } from './account/account';
+import { Wallet } from './wallet/wallet';
 import { Accounts } from './accounts/accounts';
 import { Blocks } from './blocks/blocks';
 import { Key } from './key/key';
@@ -22,8 +22,8 @@ export class Nona {
     this.accounts = new Accounts(this.rpc, this.webSocket);
   }
 
-  account(privateKey: string): Account {
-    return new Account({
+  wallet(privateKey: string): Wallet {
+    return new Wallet({
       rpc: this.rpc,
       blocks: this.blocks,
       accounts: this.accounts,
