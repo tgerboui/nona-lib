@@ -4,12 +4,14 @@ import { Account } from './account/account';
 import { Blocks } from './blocks/blocks';
 import { Key } from './key/key';
 import { NonaWebSocket } from './websocket/websocket';
+import { Node } from './node/node';
 
 export class Nona {
   public rpc: Rpc;
   public webSocket: NonaWebSocket;
   public blocks: Blocks;
   public key: Key;
+  public node: Node;
 
   // TODO: Set options in interface
   // TODO: Set default values in interface
@@ -18,6 +20,7 @@ export class Nona {
     this.webSocket = new NonaWebSocket({ url: webSocketUrl });
     this.blocks = new Blocks(this.rpc);
     this.key = new Key(this.rpc);
+    this.node = new Node(this.rpc);
   }
 
   public account(account: string): Account {
