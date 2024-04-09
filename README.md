@@ -19,6 +19,7 @@ Information about the project's license.
 ## TODO
 
 - [ ] Change options to params in params methods
+- [ ] Review names account and accounts
 - [ ] Websocket support
 - [ ] Work server options
 - [ ] Tests
