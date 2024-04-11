@@ -8,6 +8,7 @@ import { WalletListAndReceiveParams } from './wallet-interface';
 import { UnitService } from '../../services/unit/unit-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { NonaWebSocket } from '../websocket/websocket';
+import { ConfirmationMessage } from '../websocket/confirmation/websocket-confirmation-interface';
 
 export class Wallet extends Account {
   public publicKey: string;
@@ -161,13 +162,23 @@ export class Wallet extends Account {
   }
 
   // The account need to be opened to receive transactions
-  public listenAndReceive(params?: WalletListAndReceiveParams): Subscription {
+  public listenAndReceive(params: WalletListAndReceiveParams = {}): Subscription {
+    const nextHandler = async (message: ConfirmationMessage) => {
+      try {
+        await this.receive(message.hash);
+        // Send the message to the next callback once the transaction is received
+        if (params.next) {
+          params.next(message);
+        }
+      } catch (error) {
+        if (params.error) {
+          params.error(error);
+        }
+      }
+    };
+
     return this.listenConfirmation({
-      next: (message) => {
-        params?.next && params?.next(message);
-        // Receive the transaction
-        this.receive(message.hash);
-      },
+      next: nextHandler,
       error: params?.error,
       complete: params?.complete,
       // Only listen to send transactions to this account

@@ -17,7 +17,6 @@ export class WebSocketManager {
   constructor({ url }: WebsocketParams) {
     this.wsSubject = webSocket({
       url,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       WebSocketCtor: WebSocket as any,
     });
   }
