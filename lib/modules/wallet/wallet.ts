@@ -57,7 +57,10 @@ export class Wallet extends Account {
 
   /// Receive a pending transaction
   public async receive(hash?: string): Promise<string> {
-    const info = await this.info(true);
+    const info = await this.info({
+      representative: true,
+      raw: true,
+    });
     let receiveHash = hash;
 
     // If no hash is provided, get a receivable hash
@@ -88,7 +91,10 @@ export class Wallet extends Account {
   }
 
   public async receiveHashes(hashes: string[]): Promise<string[]> {
-    const info = await this.info(true);
+    const info = await this.info({
+      representative: true,
+      raw: true,
+    });
     let balance = new BigNumber(info.balance);
     let previous = info.frontier;
     const receivedHashes: string[] = [];
@@ -129,7 +135,10 @@ export class Wallet extends Account {
 
   // TODO: Create send raw and add string to parameters
   public async send(address: string, amount: number | string): Promise<string> {
-    const info = await this.info(true);
+    const info = await this.info({
+      representative: true,
+      raw: true,
+    });
     const balance = new BigNumber(info.balance);
     // Convert nano amout to raw amount
     const rawAmount = UnitService.nanoToRaw(amount);
@@ -170,7 +179,9 @@ export class Wallet extends Account {
   }
 
   public async change(representative: string): Promise<string> {
-    const info = await this.info();
+    const info = await this.info({
+      raw: true,
+    });
 
     const block = await this.blocks.create({
       account: this.address,

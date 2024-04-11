@@ -13,21 +13,34 @@ export const ReceivableHashes = z.object({
 export type ReceivableHashes = z.infer<typeof ReceivableHashes>;
 
 export const AccountInfo = z.object({
+  /** Hash of the latest block in the account's blockchain. */
   frontier: z.string(),
+  /** Hash of the first block in the account's blockchain. */
   open_block: z.string(),
+  /** Hash of the block where the account's representative was last set or changed. Representatives vote on behalf of accounts for network consensus. */
   representative_block: z.string(),
+  /** Current balance of the account. In nano if raw param is set to false (default) otherwise in raw unit. */
   balance: z.string(),
+  /** UNIX timestamp indicating the last time the account's blockchain was modified. */
   modified_timestamp: z.string(),
+  /** Total number of blocks in the account's blockchain, including send, receive, change, and epoch blocks. */
   block_count: z.string(),
+  /** Version of the account, reflecting certain features or capabilities of the account on the network. */
   account_version: z.string(),
+  /** Height of the highest block in the account's blockchain that has been confirmed by the network. */
   confirmation_height: z.string(),
+  /** Block hash at the confirmation height, pointing to the last confirmed block in the account's chain. */
   confirmation_height_frontier: z.string(),
-  representative: z.string().optional(),
 });
 export type AccountInfo = z.infer<typeof AccountInfo>;
-export type AccountInfoRepresentative = AccountInfo & {
-  representative: string;
-};
+
+export const AccountInfoRepresentative = AccountInfo.and(
+  z.object({
+    /** Account address of the currently set representative for this account. */
+    representative: z.string(),
+  }),
+);
+export type AccountInfoRepresentative = z.infer<typeof AccountInfoRepresentative>;
 
 export const AccountRawBalance = z.object({
   balance: z.string(),

@@ -2,6 +2,8 @@ import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import {
   AccountBalance,
   AccountHistoryParams,
+  InfoParams,
+  InfoParamsWithRepresentative,
   ListenConfirmationParams,
   Receivable,
   ReceivableHasheBlocks,
@@ -30,10 +32,16 @@ export class Account extends RpcConsummer {
     super(rpc);
   }
 
-  public async receivable(options: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
-  public async receivable(options: ReceivableOptionsSorted): Promise<ReceivableValueBlocks>;
-  public async receivable(options: ReceivableOptions): Promise<Receivable>;
-  public async receivable({ count = 100, sort = false }: ReceivableOptions): Promise<Receivable> {
+  /**
+   * Returns a list of block hashes which have not yet been received by this account.
+   */
+  public async receivable(options?: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
+  public async receivable(options?: ReceivableOptionsSorted): Promise<ReceivableValueBlocks>;
+  public async receivable(options?: ReceivableOptions): Promise<Receivable>;
+  public async receivable({
+    count = 100,
+    sort = false,
+  }: ReceivableOptions = {}): Promise<Receivable> {
     const receivable = await this.rpc.call('receivable', {
       account: this.account,
       count: count?.toString() ?? undefined,
@@ -51,12 +59,29 @@ export class Account extends RpcConsummer {
     return blocksArray;
   }
 
-  public async info(representative?: true): Promise<AccountInfoRepresentative>;
-  public async info(representative?: boolean): Promise<AccountInfo>;
-  public async info(representative = false): Promise<AccountInfo> {
+  /**
+   * Returns general information for account. Only works for accounts that have received their first transaction and have an entry on the ledger, will return "Account not found" otherwise. To open an account, use open.
+   *
+   * @param representative - If true, the representative field will be included in the response. Default to false.
+   * @param raw - Specifies whether to return the raw balance. Default to false.
+   * @returns Frontier, open block, change representative block, balance, last modified timestamp from local database & block count
+   */
+  public async info(params: InfoParamsWithRepresentative): Promise<AccountInfoRepresentative>;
+  public async info(params?: InfoParams): Promise<AccountInfo>;
+  public async info({
+    representative = false,
+    raw = false,
+  }: InfoParams = {}): Promise<AccountInfo> {
     const res = await this.rpc.call('account_info', { account: this.account, representative });
+    const schema = representative ? AccountInfoRepresentative : AccountInfo;
+    const info = this.parseHandler(res, schema);
 
-    return this.parseHandler(res, AccountInfo);
+    if (raw) return info;
+
+    return {
+      ...info,
+      balance: UnitService.rawToNanoString(info.balance),
+    };
   }
 
   public async rawBalance(): Promise<AccountRawBalance> {
@@ -101,7 +126,9 @@ export class Account extends RpcConsummer {
   }
 
   public async representative(): Promise<string> {
-    const { representative } = await this.info(true);
+    const { representative } = await this.info({
+      representative: true,
+    });
 
     return representative;
   }

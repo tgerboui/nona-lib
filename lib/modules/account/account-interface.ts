@@ -16,11 +16,37 @@ export interface ReceivableOptionsUnsorted extends ReceivableOptions {
   sort?: false;
 }
 
+/**
+ * Represents a list of receivable block identifiers as strings.
+ * These can be used to fetch more detailed information about each block.
+ */
 export type ReceivableHasheBlocks = string[];
 export type ReceivableValueBlocks = {
+  /** Key: hash of the block, value: amount */
   [key: string]: string;
 };
+/**
+ * Represents a list of receivable block identifiers as strings.
+ * These can be used to fetch more detailed information about each block.
+ */
 export type Receivable = ReceivableHasheBlocks | ReceivableValueBlocks;
+
+export interface InfoParams {
+  /**
+   * Specifies whether to include the representative in the response.
+   * Default to false.
+   */
+  representative?: boolean;
+  /**
+   * Specifies whether to return the raw balance.
+   * Default to false.
+   */
+  raw?: boolean;
+}
+
+export type InfoParamsWithRepresentative = InfoParams & {
+  representative: true;
+};
 
 export interface AccountBalance {
   balance: string;
