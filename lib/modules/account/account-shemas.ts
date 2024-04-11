@@ -42,12 +42,24 @@ export const AccountInfoRepresentative = AccountInfo.and(
 );
 export type AccountInfoRepresentative = z.infer<typeof AccountInfoRepresentative>;
 
-export const AccountRawBalance = z.object({
+export const AccountBalance = z.object({
+  /**
+   * Total balance of the account.
+   * This is the balance that is currently settled in the account.
+   */
   balance: z.string(),
+  /**
+   * Total balance that is pending receipt.
+   * pending was deprecated in favor of receivable. For compatibility reasons both terms are still available for many calls and in responses.
+   * For more details see: https://docs.nano.org/releases/release-v24-0/#pendingreceivable-term-rpc-updates.
+   */
   pending: z.string(),
+  /**
+   * Total balance that is available to be received.
+   */
   receivable: z.string(),
 });
-export type AccountRawBalance = z.infer<typeof AccountRawBalance>;
+export type AccountBalance = z.infer<typeof AccountBalance>;
 
 export const AccountHistory = z.object({
   history: z.array(

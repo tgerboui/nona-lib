@@ -48,12 +48,6 @@ export type InfoParamsWithRepresentative = InfoParams & {
   representative: true;
 };
 
-export interface AccountBalance {
-  balance: string;
-  pending: string;
-  receivable: string;
-}
-
 export type ListenConfirmationParams = Omit<WebSocketConfirmationParams, 'filter'> & {
   filter?: Omit<ConfirmationFilter, 'accounts'>;
 };

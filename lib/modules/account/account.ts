@@ -1,6 +1,5 @@
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import {
-  AccountBalance,
   AccountHistoryParams,
   InfoParams,
   InfoParamsWithRepresentative,
@@ -16,7 +15,7 @@ import {
   AccountHistory,
   AccountInfo,
   AccountInfoRepresentative,
-  AccountRawBalance,
+  AccountBalance,
   ReceivableHashes,
   ReceivableValues,
   accountBlockCountSchema,
@@ -84,21 +83,24 @@ export class Account extends RpcConsummer {
     };
   }
 
-  public async rawBalance(): Promise<AccountRawBalance> {
+  /**
+   * Returns how many nano is owned and how many have not yet been received by account.
+   *
+   * @param raw - Specifies whether to return the raw balance. Default to false.
+   * @returns Balance, pending and receivable as string to avoid precision loss.
+   */
+  public async balance({ raw = false }: { raw?: boolean } = {}): Promise<AccountBalance> {
     const res = await this.rpc.call('account_balance', { account: this.account });
+    const balance = this.parseHandler(res, AccountBalance);
 
-    return this.parseHandler(res, AccountRawBalance);
-  }
+    // Directly return the raw balance if raw is set to true because the balance is already in raw unit.
+    if (raw) return balance;
 
-  // TODO: Explain why string and warn about converting to number
-  public async balance(): Promise<AccountBalance> {
-    const { balance, pending, receivable } = await this.rawBalance();
-
-    // TODO: Set this in the schema
+    // Otherwise, convert the balance to nano unit.
     return {
-      balance: UnitService.rawToNano(balance).toString(10),
-      pending: UnitService.rawToNano(pending).toString(10),
-      receivable: UnitService.rawToNano(receivable).toString(10),
+      balance: UnitService.rawToNanoString(balance.balance),
+      pending: UnitService.rawToNanoString(balance.pending),
+      receivable: UnitService.rawToNanoString(balance.receivable),
     };
   }
 
