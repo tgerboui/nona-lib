@@ -1,27 +1,42 @@
 import { KeyService } from '../../services/hash/key-service';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { AccountKeys } from './key-interface';
-import { Keys } from './key-schema';
 
 export class Key extends RpcConsummer {
-  // TODO: Add options to set seed
-  async create(): Promise<AccountKeys> {
-    const keys = await this.rpc.call('key_create');
+  /**
+   * Create keys for an account
+   *
+   * @param seed - Seed to generate the keys
+   * @returns Private key, public key and address
+   */
+  public async create(seed?: string): Promise<AccountKeys> {
+    let generativeSeed = seed;
+    if (!generativeSeed) {
+      generativeSeed = await KeyService.generateSeed();
+    }
 
-    const parsedKeys = this.parseHandler(keys, Keys);
+    const privateKey = KeyService.getSecretKey(generativeSeed, 0);
+    const publicKey = KeyService.getPublicKey(privateKey);
+    const address = KeyService.getAddress(publicKey);
 
     return {
-      privateKey: parsedKeys.private,
-      publicKey: parsedKeys.public,
-      account: parsedKeys.account,
+      privateKey,
+      publicKey,
+      address,
     };
   }
 
-  expand(privateKey: string): AccountKeys {
+  /**
+   * Expand a private key to public key and address
+   *
+   * @param privateKey private key to expand
+   * @returns public key and address
+   */
+  public expand(privateKey: string): AccountKeys {
     return {
       privateKey: privateKey,
       publicKey: KeyService.getPublicKey(privateKey),
-      account: KeyService.getAddress(KeyService.getPublicKey(privateKey)),
+      address: KeyService.getAddress(KeyService.getPublicKey(privateKey)),
     };
   }
 }
