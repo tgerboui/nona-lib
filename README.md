@@ -1,6 +1,6 @@
-# Nona
+# Nona 👵
 
-// TODO: Review introduction
+// TODO: Review introduction  
 Typescript client to interact with your Nano node.
 This client simplifies the complexities involved in communicating with a Nano node, providing streamlined processes for sending and receiving transactions, retrieving wallet, managing websockets and more.
 Start integrating Nano transactions into your applications seamlessly with our easy-to-use Typescript client.
@@ -102,6 +102,19 @@ const subscription = await wallet.listenAndReceive({
 // Don't forget to unsubscribe when you don't need it anymore
 subscription.unsubscribe();
 ```
+
+## Nona API
+
+### Wallet
+
+The wallet is the main object to interact with your account.
+
+```typescript
+const wallet = await nona.wallet(privateKey);
+```
+
+> [!WARNING]  
+> This wallet API does not interact with the [wallet RPCs commands](https://docs.nano.org/commands/rpc-protocol/#wallet-rpcs) this naming is only for convenience.
 
 // TODO: Set websocket documentation  
 More information about websocket, see [Websocket](#websocket).
