@@ -193,7 +193,9 @@ await wallet.receiveMultipleTransactions(hashes);
 > [!NOTE]  
 > All the webscoket related methods use Rxjs Observables and return a Subscription object. For more information about observables and subscriptions, see the [Rxjs documentation](https://rxjs.dev/).
 
-`listenAndReceive(params?: WalletListAndReceiveParams): Subscription`
+```typescript
+listenAndReceive(params?: WalletListAndReceiveParams): Subscription
+```
 
 Listens for incoming transactions and automatically receives them.  
 Return a [Subscription](https://rxjs.dev/guide/subscription) object.
