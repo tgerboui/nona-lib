@@ -10,11 +10,13 @@ import { Rpc } from '../../services/rpc/rpc';
 import { NonaWebSocket } from '../websocket/websocket';
 import { ConfirmationMessage } from '../websocket/confirmation/websocket-confirmation-interface';
 
+/**
+ * Handle wallet operations such as opening, receiving, sending, and changing representatives.
+ */
 export class Wallet extends Account {
   public publicKey: string;
   public address: string;
 
-  // TODO: Change this interface
   constructor(
     private privateKey: string,
     private blocks: Blocks,
@@ -33,6 +35,11 @@ export class Wallet extends Account {
 
   // TODO: Implement optional hash
   // TODO: Set options in interface
+  /**
+   * Opens the account with the provided representative.
+   * @param representative The representative to open the wallet with.
+   * @returns A promise that resolves to the hash of the opened block.
+   */
   public async open(representative: string): Promise<string> {
     // Highest hash
     const lastHashes = await this.receivable({ count: 1, sort: true });
@@ -56,7 +63,11 @@ export class Wallet extends Account {
     return this.blocks.process(block, 'open');
   }
 
-  /// Receive a pending transaction
+  /**
+   * Receives a pending transaction.
+   * @param hash The hash of the transaction to receive. If not provided, a receivable hash will be used.
+   * @returns A promise that resolves to the hash of the received block.
+   */
   public async receive(hash?: string): Promise<string> {
     const info = await this.info({
       representative: true,
@@ -91,7 +102,12 @@ export class Wallet extends Account {
     return this.blocks.process(block, 'receive');
   }
 
-  public async receiveHashes(hashes: string[]): Promise<string[]> {
+  /**
+   * Receives multiple pending transactions.
+   * @param hashes An array of hashes of the transactions to receive.
+   * @returns A promise that resolves to an array of hashes of the received blocks.
+   */
+  public async receiveMultipleTransactions(hashes: string[]): Promise<string[]> {
     const info = await this.info({
       representative: true,
       raw: true,
@@ -120,21 +136,33 @@ export class Wallet extends Account {
     return receivedHashes;
   }
 
-  /// Receive all pending transactions
+  /**
+   * Receives all pending transactions.
+   * @returns A promise that resolves to an array of hashes of the received blocks.
+   */
   public async receiveAll(): Promise<string[]> {
     const receivedHashes: string[] = [];
 
-    let receivable = await this.receivable({ count: 100 });
-    while (receivable.length > 0) {
-      const received = await this.receiveHashes(receivable);
-      receivedHashes.push(...received);
-      receivable = await this.receivable({ count: 100 });
+    let hasPending = true;
+    while (hasPending) {
+      const receivable = await this.receivable({ count: 100 });
+
+      hasPending = receivable.length > 0;
+      if (hasPending) {
+        const received = await this.receiveMultipleTransactions(receivable);
+        receivedHashes.push(...received);
+      }
     }
 
     return receivedHashes;
   }
 
-  // TODO: Create send raw and add string to parameters
+  /**
+   * Sends a transaction to the specified address.
+   * @param address The address to send the transaction to.
+   * @param amount The amount to send in nano unit.
+   * @returns A promise that resolves to the hash of the sent block.
+   */
   public async send(address: string, amount: number | string): Promise<string> {
     const info = await this.info({
       representative: true,
@@ -161,7 +189,11 @@ export class Wallet extends Account {
     return this.blocks.process(block, 'send');
   }
 
-  // The account need to be opened to receive transactions
+  /**
+   * Listens for incoming transactions and automatically receives them.
+   * @param {{ next, error, complete }} params Callback for the listener.
+   * @returns A Subscription object that can be used to unsubscribe from the listener.
+   */
   public listenAndReceive(params: WalletListAndReceiveParams = {}): Subscription {
     const nextHandler = async (message: ConfirmationMessage) => {
       try {
@@ -189,6 +221,11 @@ export class Wallet extends Account {
     });
   }
 
+  /**
+   * Changes the representative of the account.
+   * @param representative The new representative to set.
+   * @returns A promise that resolves to the hash of the changed block.
+   */
   public async change(representative: string): Promise<string> {
     const info = await this.info({
       raw: true,
