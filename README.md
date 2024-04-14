@@ -123,10 +123,12 @@ const wallet = await nona.wallet(privateKey);
 
 #### Open
 
-`open(representative: string): Promise<string>`
+```typescript
+open(representative: string): Promise<string>
+```
 
 Opens the account with the provided representative.
-The first transaction of an account is crafted in a slightly different way. To open an account, you must have sent some funds to it with from another account.
+The first transaction of an account is crafted in a [slightly different way](https://docs.nano.org/integration-guides/key-management/#first-receive-transaction). To open an account, you must have sent some funds to it with from another account.
 Returns the hash of the transaction.
 
 ```typescript
@@ -136,7 +138,9 @@ await wallet.open(representative);
 
 #### Send
 
-`send(address: string, amount: number | string): Promise<string>`
+```typescript
+send(address: string, amount: number | string): Promise<string>
+```
 
 Sends a transaction to the specified address.  
 The amount is in nano unit.  
@@ -154,7 +158,9 @@ await wallet.send(address, amount);
 
 #### Receive
 
-`receive(hash?: string): Promise<string>`
+```typescript
+receive(hash?: string): Promise<string>
+```
 
 Receives a pending transaction.  
 The hash of the transaction to receive can be provided. If not, a receivable hash will be used.  
@@ -166,7 +172,9 @@ await wallet.receive();
 
 #### Receive all
 
-`receiveAll(): Promise<string[]>`
+```typescript
+receiveAll(): Promise<string[]>
+```
 
 Receives all pending transactions.  
 Returns an array of hashes of the received blocks.
@@ -177,7 +185,9 @@ await wallet.receiveAll();
 
 #### Receive multiple transactions
 
-`receiveMultipleTransactions(hashes: string[]): Promise<string[]>`
+```typescript
+receiveMultipleTransactions(hashes: string[]): Promise<string[]>
+```
 
 Receives multiple pending transactions.
 From an array of hashes of the transactions to receive.
