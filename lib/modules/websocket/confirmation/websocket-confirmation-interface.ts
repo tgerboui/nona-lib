@@ -1,6 +1,6 @@
 // TODO: Document each field
 export interface WebSocketConfirmationParams {
-  next: (message: ConfirmationMessage) => unknown;
+  next: (message: ConfirmationBlock) => unknown;
   complete?: () => unknown;
   error?: (error: unknown) => unknown;
   filter?: ConfirmationFilter;
@@ -12,7 +12,7 @@ export interface WebSocketUpdateConfirmationParams {
 }
 
 // TODO: Explain each field
-export interface ConfirmationMessage {
+export interface ConfirmationBlock {
   from: string;
   to: string;
   amount: string;

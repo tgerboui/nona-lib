@@ -1,8 +1,8 @@
 import { UnitService } from '../../../services/unit/unit-service';
-import { ConfirmationFilter, ConfirmationMessage } from './websocket-confirmation-interface';
+import { ConfirmationFilter, ConfirmationBlock } from './websocket-confirmation-interface';
 import { WebSocketConfirmationMessage } from './websocket-confirmation-schema';
 
-export function messageMapper(message: unknown): ConfirmationMessage {
+export function messageMapper(message: unknown): ConfirmationBlock {
   // TODO: Handle zod parsing errors
   const confirmation = WebSocketConfirmationMessage.parse(message);
 
@@ -19,7 +19,7 @@ export function messageMapper(message: unknown): ConfirmationMessage {
   };
 }
 
-export function messageFilter(message: ConfirmationMessage, filter?: ConfirmationFilter): boolean {
+export function messageFilter(message: ConfirmationBlock, filter?: ConfirmationFilter): boolean {
   if (!filter) return true;
 
   const { accounts, subtype, from, to } = filter;

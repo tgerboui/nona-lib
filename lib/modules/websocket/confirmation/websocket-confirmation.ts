@@ -3,7 +3,7 @@ import { Observable, Subscription, filter, finalize, map } from 'rxjs';
 import { WebSocketManager } from '../manager/websocket-manager';
 import {
   ConfirmationFilter,
-  ConfirmationMessage,
+  ConfirmationBlock,
   WebSocketConfirmationParams,
   WebSocketUpdateConfirmationParams,
 } from './websocket-confirmation-interface';
@@ -27,8 +27,8 @@ export class WebSocketConfirmation {
     this.addSubscription(accountToListen);
     return this.observable
       .pipe(
-        map<unknown, ConfirmationMessage>((message) => messageMapper(message)),
-        filter<ConfirmationMessage>((message) => messageFilter(message, params.filter)),
+        map<unknown, ConfirmationBlock>((message) => messageMapper(message)),
+        filter<ConfirmationBlock>((message) => messageFilter(message, params.filter)),
         finalize(() => this.removeSubscription(accountToListen)),
       )
       .subscribe({

@@ -8,7 +8,7 @@ import { WalletListAndReceiveParams } from './wallet-interface';
 import { UnitService } from '../../services/unit/unit-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { NonaWebSocket } from '../websocket/websocket';
-import { ConfirmationMessage } from '../websocket/confirmation/websocket-confirmation-interface';
+import { ConfirmationBlock } from '../websocket/confirmation/websocket-confirmation-interface';
 
 /**
  * Handle wallet operations such as opening, receiving, sending, and changing representatives.
@@ -195,12 +195,12 @@ export class Wallet extends Account {
    * @returns A Subscription object that can be used to unsubscribe from the listener.
    */
   public listenAndReceive(params: WalletListAndReceiveParams = {}): Subscription {
-    const nextHandler = async (message: ConfirmationMessage) => {
+    const nextHandler = async (block: ConfirmationBlock) => {
       try {
-        await this.receive(message.hash);
+        await this.receive(block.hash);
         // Send the message to the next callback once the transaction is received
         if (params.next) {
-          params.next(message);
+          params.next(block);
         }
       } catch (error) {
         if (params.error) {
