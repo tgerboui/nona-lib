@@ -3,16 +3,24 @@ import {
   WebSocketConfirmationParams,
 } from '../websocket/confirmation/websocket-confirmation-interface';
 
-export interface ReceivableOptions {
+export interface ReceivableParams {
+  /**
+   * Specifies the number of blocks to return.
+   * Default to 100.
+   */
   count?: number;
+  /**
+   * Specifies whether to sort the response by block amount.
+   * Default to false.
+   */
   sort?: boolean;
 }
 
-export interface ReceivableOptionsSorted extends ReceivableOptions {
+export interface ReceivableParamsSorted extends ReceivableParams {
   sort: true;
 }
 
-export interface ReceivableOptionsUnsorted extends ReceivableOptions {
+export interface ReceivableParamsUnsorted extends ReceivableParams {
   sort?: false;
 }
 
@@ -54,10 +62,15 @@ export type ListenConfirmationParams = Omit<WebSocketConfirmationParams, 'filter
 
 // TODO: Docs
 export interface AccountHistoryParams {
+  /** Number of blocks to return. Default to 100. */
   count?: number; /// Default 100
+  /** Hash of the block to start from. */
   head?: string;
+  /** Number of blocks to skip. */
   offset?: number;
+  /** Reverse order */
   reverse?: boolean;
+  /** Filter the blocks */
   account_filter?: string[];
   // TODO: Handle raw format
   // raw?: string;

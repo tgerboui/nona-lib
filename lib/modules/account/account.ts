@@ -1,4 +1,9 @@
+import { Subscription } from 'rxjs';
+
+import { Rpc } from '../../services/rpc/rpc';
+import { UnitService } from '../../services/unit/unit-service';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
+import { NonaWebSocket } from '../websocket/websocket';
 import {
   AccountHistoryParams,
   InfoParams,
@@ -6,43 +11,41 @@ import {
   ListenConfirmationParams,
   Receivable,
   ReceivableHasheBlocks,
-  ReceivableOptions,
-  ReceivableOptionsSorted,
-  ReceivableOptionsUnsorted,
+  ReceivableParams,
+  ReceivableParamsSorted,
+  ReceivableParamsUnsorted,
   ReceivableValueBlocks,
 } from './account-interface';
 import {
+  AccountBalance,
+  accountBlockCountSchema,
   AccountHistory,
   AccountInfo,
   AccountInfoRepresentative,
-  AccountBalance,
+  accountWeightSchema,
   ReceivableHashes,
   ReceivableValues,
-  accountBlockCountSchema,
-  accountWeightSchema,
 } from './account-shemas';
-import { UnitService } from '../../services/unit/unit-service';
-import { Rpc } from '../../services/rpc/rpc';
-import { Subscription } from 'rxjs';
-import { NonaWebSocket } from '../websocket/websocket';
 
 export class Account extends RpcConsummer {
-  constructor(private account: string, private websocket: NonaWebSocket, rpc: Rpc) {
+  constructor(public address: string, private websocket: NonaWebSocket, rpc: Rpc) {
     super(rpc);
   }
 
   /**
    * Returns a list of block hashes which have not yet been received by this account.
+   * @param {{ count, sort }} params - Receivable parameters
+   * @returns An array of block hashes is not sorted or an object with block hashes as keys and amounts as values.
    */
-  public async receivable(options?: ReceivableOptionsUnsorted): Promise<ReceivableHasheBlocks>;
-  public async receivable(options?: ReceivableOptionsSorted): Promise<ReceivableValueBlocks>;
-  public async receivable(options?: ReceivableOptions): Promise<Receivable>;
+  public async receivable(params?: ReceivableParamsUnsorted): Promise<ReceivableHasheBlocks>;
+  public async receivable(params?: ReceivableParamsSorted): Promise<ReceivableValueBlocks>;
+  public async receivable(params?: ReceivableParams): Promise<Receivable>;
   public async receivable({
     count = 100,
     sort = false,
-  }: ReceivableOptions = {}): Promise<Receivable> {
+  }: ReceivableParams = {}): Promise<Receivable> {
     const receivable = await this.rpc.call('receivable', {
-      account: this.account,
+      account: this.address,
       count: count?.toString() ?? undefined,
       sorting: sort,
     });
@@ -71,7 +74,7 @@ export class Account extends RpcConsummer {
     representative = false,
     raw = false,
   }: InfoParams = {}): Promise<AccountInfo> {
-    const res = await this.rpc.call('account_info', { account: this.account, representative });
+    const res = await this.rpc.call('account_info', { account: this.address, representative });
     const schema = representative ? AccountInfoRepresentative : AccountInfo;
     const info = this.parseHandler(res, schema);
 
@@ -90,7 +93,7 @@ export class Account extends RpcConsummer {
    * @returns Balance, pending and receivable as string to avoid precision loss.
    */
   public async balance({ raw = false }: { raw?: boolean } = {}): Promise<AccountBalance> {
-    const res = await this.rpc.call('account_balance', { account: this.account });
+    const res = await this.rpc.call('account_balance', { account: this.address });
     const balance = this.parseHandler(res, AccountBalance);
 
     // Directly return the raw balance if raw is set to true because the balance is already in raw unit.
@@ -104,24 +107,41 @@ export class Account extends RpcConsummer {
     };
   }
 
+  /**
+   * Listen for confirmation of a transaction.
+   * @param {{ next, error, complete, filter }} params Callback for the listener and filter for the confirmation.
+   * @returns Subscription object that can be used to unsubscribe from the listener.
+   */
   public listenConfirmation(params: ListenConfirmationParams): Subscription {
     return this.websocket.confirmation.subscribe({
       ...params,
-      filter: { ...params.filter, accounts: [this.account] },
+      filter: { ...params.filter, accounts: [this.address] },
     });
   }
 
+  // TODO: Implement raw
+  /**
+   * Retrieves the account history.
+   *
+   * @param {AccountHistoryParams} [params] - Optional parameters for the account history request.
+   * @param {number} [params.count=100] - The number of history entries to retrieve.
+   * @returns {Promise<AccountHistory>} - A promise that resolves to the account history.
+   */
   public async history({
     count = 100,
     ...params
   }: AccountHistoryParams = {}): Promise<AccountHistory> {
-    const res = await this.rpc.call('account_history', { account: this.account, ...params, count });
+    const res = await this.rpc.call('account_history', {
+      account: this.address,
+      ...params,
+      count,
+    });
 
     return this.parseHandler(res, AccountHistory);
   }
 
   public async blockCount(): Promise<number> {
-    const res = await this.rpc.call('account_block_count', { account: this.account });
+    const res = await this.rpc.call('account_block_count', { account: this.address });
     const count = this.parseHandler(res, accountBlockCountSchema).block_count;
 
     return parseInt(count, 10);
@@ -136,7 +156,7 @@ export class Account extends RpcConsummer {
   }
 
   public async weight(): Promise<string> {
-    const res = await this.rpc.call('account_weight', { account: this.account });
+    const res = await this.rpc.call('account_weight', { account: this.address });
     return this.parseHandler(res, accountWeightSchema).weight;
   }
 }

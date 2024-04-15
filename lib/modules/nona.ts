@@ -23,8 +23,8 @@ export class Nona {
     this.node = new Node(this.rpc);
   }
 
-  public account(account: string): Account {
-    return new Account(account, this.webSocket, this.rpc);
+  public account(address: string): Account {
+    return new Account(address, this.webSocket, this.rpc);
   }
 
   public wallet(privateKey: string): Wallet {
