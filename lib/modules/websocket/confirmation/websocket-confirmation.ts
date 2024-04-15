@@ -1,13 +1,22 @@
-import { Observable, Subscription, filter, finalize, map } from 'rxjs';
+import {
+  filter,
+  finalize,
+  map,
+  Observable,
+  Subscription,
+} from 'rxjs';
 
 import { WebSocketManager } from '../manager/websocket-manager';
 import {
-  ConfirmationFilter,
+  messageFilter,
+  messageMapper,
+} from './websocket-confirmation-helper';
+import {
   ConfirmationBlock,
+  ConfirmationFilter,
   WebSocketConfirmationParams,
   WebSocketUpdateConfirmationParams,
 } from './websocket-confirmation-interface';
-import { messageFilter, messageMapper } from './websocket-confirmation-helper';
 
 // TODO: Really need tests here
 export class WebSocketConfirmation {

@@ -2,13 +2,15 @@ import BigNumber from 'bignumber.js';
 import { Subscription } from 'rxjs';
 
 import { KeyService } from '../../services/hash/key-service';
+import { Rpc } from '../../services/rpc/rpc';
+import { UnitService } from '../../services/unit/unit-service';
 import { Account } from '../account/account';
 import { Blocks } from '../blocks/blocks';
-import { WalletListAndReceiveParams } from './wallet-interface';
-import { UnitService } from '../../services/unit/unit-service';
-import { Rpc } from '../../services/rpc/rpc';
+import {
+  ConfirmationBlock,
+} from '../websocket/confirmation/websocket-confirmation-interface';
 import { NonaWebSocket } from '../websocket/websocket';
-import { ConfirmationBlock } from '../websocket/confirmation/websocket-confirmation-interface';
+import { WalletListAndReceiveParams } from './wallet-interface';
 
 /**
  * Handle wallet operations such as opening, receiving, sending, and changing representatives.
