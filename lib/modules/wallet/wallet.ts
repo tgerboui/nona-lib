@@ -34,7 +34,6 @@ export class Wallet extends Account {
   }
 
   // TODO: Implement optional hash
-  // TODO: Set options in interface
   /**
    * Opens the account with the provided representative.
    * @param representative The representative to open the wallet with.
