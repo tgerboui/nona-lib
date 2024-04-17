@@ -116,14 +116,20 @@ For more details about websocket, see [Websocket](#websocket).
   - [Listen and receive](#listen-and-receive)
 - [Account](#account)
   - [Receivable](#receivable)
-  - [Info](#info)
+  - [Account info](#account-info)
   - [Balance](#balance)
   - [Listen confirmation](#listen-confirmation)
   - [History](#history)
   - [Block count](#block-count)
   - [Representative](#representative)
   - [Weight](#weight)
-
+- [Websocket](#websocket)
+  - [Confirmation](#confirmation)
+- [Blocks](#blocks)
+  - [Count](#count)
+  - [Create block](#create-block)
+  - [Process block](#process-block)
+  - [Block info](#block-info)
 
 ### Wallet
 
@@ -323,7 +329,7 @@ console.log(receivable);
 // { 'D83124BB...': 2, '1208FF64...': 1, ... }
 ```
 
-#### Info
+#### Account info
 
 ```typescript
 info(params?: InfoParams): Promise<AccountInfo>
@@ -633,12 +639,109 @@ Subscribe to all new sent confirmation blocks to a specific account:
 
 ```typescript
 const subscription = await nona.ws.confirmation({
-  next: (confirmationBlock) => console.log('Received confirmation', confirmationBlock),
+  next: (block) => console.log('Received confirmation', block),
   filter: {
     subtype: ['send'],
     to: ['nano_1send...'],
   },
 });
+```
+
+### Blocks
+
+You can access to the blocks object with the following code:
+
+```typescript
+const blocks = nona.blocks;
+```
+
+#### Count
+
+```typescript
+count(): Promise<number>
+```
+
+Reports the number of blocks in the ledger and unchecked synchronizing blocks.  
+This count represent the node ledger and not the network status.
+
+```typescript
+const count = await blocks.count();
+console.log(count);
+// { count: '198574599', unchecked: '14', cemented: '198574599' }
+```
+
+`count` - The total number of blocks in the ledger. This includes all send, receive, open, and change blocks.  
+`unchecked` - The number of blocks that have been downloaded but not yet confirmed. These blocks are waiting in the processing queue.  
+`cemented` - The number of blocks that have been confirmed and cemented in the ledger. Cemented blocks are confirmed irreversible transactions.  
+
+#### Create block
+
+> [!WARNING]
+> This method is for advanced usage, use it if you know what you are doing.
+
+```typescript
+create(params: CreateBlockParams): Promise<string>
+```
+
+Creates a block object based on input data & signed with private key or account in wallet.
+
+Create a send block.
+Let's say you want to send 1 nano to `nano_1send...`.
+You have currently 3 nano in your account.
+
+```typescript
+const wallet = nona.wallet(privateKey);
+const info = await wallet.info();
+const sendAddress = 'nano_1send...';
+const sendAmount = 1;
+
+const sendBlock = await this.blocks.create({
+  // Current account 
+  account: wallet.address,
+  // Final balance for account after block creation. (here: current balance - send amount) 
+  balance: '2',
+  // The block hash of the previous block on this account's block chain ("0" for first block). 
+  previous: info.frontier,
+  // The representative account for the account. 
+  representative: info.representative,
+  // If the block is sending funds, set link to the public key of the destination account.
+  // If it is receiving funds, set link to the hash of the block to receive.
+  // If the block has no balance change but is updating representative only, set link to 0. 
+  link: sendAddress,
+  // Private key of the account 
+  key: privateKey,
+});
+```
+
+#### Process block
+
+> [!WARNING]
+> This method is for advanced usage, use it if you know what you are doing.
+
+```typescript
+process(block: Block, subtype: string): Promise<string>
+```
+
+Publish it to the network.
+Returns the hash of the published block.
+
+If we want to process the block created in the previous example:
+
+```typescript
+await this.blocks.process(sendBlock, 'send');
+```
+
+#### Block info
+
+```typescript
+info(hash: string): Promise<BlockInfo>
+```
+
+Retrieves information about a specific block.
+
+```typescript
+const hash = 'D83124BB...';
+const info = await blocks.info(hash);
 ```
 
 ## TODO
