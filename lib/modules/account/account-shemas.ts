@@ -121,5 +121,5 @@ export const accountBlockCountSchema = z.object({
 });
 
 export const accountWeightSchema = z.object({
-  weight: z.string().transform(UnitService.rawToNanoString),
+  weight: z.string(),
 });

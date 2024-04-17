@@ -152,6 +152,10 @@ export class Account extends RpcConsummer {
     return this.parseHandler(res, AccountHistory);
   }
 
+  /**
+   * Returns the number of blocks for this account.
+   * @returns A Promise that resolves to the number of blocks.
+   */
   public async blockCount(): Promise<number> {
     const res = await this.rpc.call('account_block_count', { account: this.address });
     const count = this.parseHandler(res, accountBlockCountSchema).block_count;
@@ -159,6 +163,10 @@ export class Account extends RpcConsummer {
     return parseInt(count, 10);
   }
 
+  /**
+   * Returns the representative of the account.
+   * @returns A Promise that resolves to a string representing the account's representative.
+   */
   public async representative(): Promise<string> {
     const { representative } = await this.info({
       representative: true,
@@ -167,8 +175,18 @@ export class Account extends RpcConsummer {
     return representative;
   }
 
-  public async weight(): Promise<string> {
+  /**
+   * Retrieves the voting weight of the account in nano unit (default).
+   * @param {{ raw }} raw - If set to true instead of the default false, output in raw unit.
+   * @returns A Promise that resolves to a string representing the voting weight of the account.
+   */
+  public async weight({ raw = false }: { raw?: boolean } = {}): Promise<string> {
     const res = await this.rpc.call('account_weight', { account: this.address });
-    return this.parseHandler(res, accountWeightSchema).weight;
+    const weight = this.parseHandler(res, accountWeightSchema).weight;
+
+    if (raw) {
+      return weight;
+    }
+    return UnitService.rawToNanoString(weight);
   }
 }
