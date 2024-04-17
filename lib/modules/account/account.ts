@@ -176,7 +176,7 @@ export class Account extends RpcConsummer {
   }
 
   /**
-   * Retrieves the voting weight of the account in nano unit (default).
+   * Returns the voting weight of the account in nano unit (default).
    * @param {{ raw }} raw - If set to true instead of the default false, output in raw unit.
    * @returns A Promise that resolves to a string representing the voting weight of the account.
    */
