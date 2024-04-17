@@ -1,21 +1,22 @@
 import { UnitService } from '../../../services/unit/unit-service';
-import { ConfirmationFilter, ConfirmationBlock } from './websocket-confirmation-interface';
+import { ConfirmationBlock, ConfirmationFilter } from './websocket-confirmation-interface';
 import { WebSocketConfirmationMessage } from './websocket-confirmation-schema';
 
 export function messageMapper(message: unknown): ConfirmationBlock {
   // TODO: Handle zod parsing errors
   const confirmation = WebSocketConfirmationMessage.parse(message);
+  const { amount, account, block, hash, confirmation_type } = confirmation;
 
   return {
-    from: confirmation.account,
-    to: confirmation.block.link_as_account,
-    amount: UnitService.rawToNano(confirmation.amount).toString(10),
-    subtype: confirmation.block.subtype,
-    hash: confirmation.hash,
-    previous: confirmation.block.previous,
-    work: confirmation.block.work,
-    link: confirmation.block.link,
-    confirmationType: confirmation.confirmation_type,
+    from: account,
+    to: block.link_as_account,
+    amount: UnitService.rawToNanoString(amount),
+    subtype: block.subtype,
+    hash: hash,
+    previous: block.previous,
+    work: block.work,
+    link: block.link,
+    confirmationType: confirmation_type,
   };
 }
 

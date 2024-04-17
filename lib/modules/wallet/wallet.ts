@@ -93,7 +93,7 @@ export class Wallet extends Account {
       account: this.address,
       previous: info.frontier,
       representative: info.representative,
-      balance: finalBalance.toString(10),
+      balance: finalBalance.toString(),
       link: receiveHash,
       key: this.privateKey,
     });
@@ -124,7 +124,7 @@ export class Wallet extends Account {
         account: this.address,
         previous: previous,
         representative: info.representative,
-        balance: balance.toString(10),
+        balance: balance.toString(),
         link: hash,
         key: this.privateKey,
       });
@@ -175,13 +175,14 @@ export class Wallet extends Account {
     if (balance.isLessThan(amount)) {
       throw new Error('Insufficient balance');
     }
+    const finalBalance = balance.minus(rawAmount);
 
     // TODO: Maybe set create block in a function in this class
     const block = await this.blocks.create({
       account: this.address,
       previous: info.frontier,
       representative: info.representative,
-      balance: balance.minus(rawAmount).toString(10),
+      balance: finalBalance.toString(),
       link: address,
       key: this.privateKey,
     });
