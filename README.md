@@ -1,18 +1,14 @@
-# Nona 👵
+# Nona Lib
 
 // TODO: Review introduction  
 Typescript client to interact with your Nano node.
 This client simplifies the complexities involved in communicating with a Nano node, providing streamlined processes for sending and receiving transactions, retrieving wallet, managing websockets and more.
 Start integrating Nano transactions into your applications seamlessly with our easy-to-use Typescript client.
 
-## Table of Contents
-
-// TODO: Set the table of contents
-
 ## Installation
 
 // TODO: Review the installation instructions
-`npm install @nona/nona`
+`npm install nona-lib`
 
 // TODO: Mention information about RPC enable_control
 
@@ -55,7 +51,7 @@ Then call the open method:
 // You must provide a representative address to open the account
 const reprensentative = 'nano_3rep...';
 
-const wallet = await nona.wallet(privateKey);
+const wallet = nona.wallet(privateKey);
 await wallet.open(reprensentative);
 ```
 
@@ -69,7 +65,7 @@ To send a transaction, you must have an opened account (see [Open an account](#o
 const receveiver = 'nano_1rece...';
 const amount = 2;
 
-const wallet = await nona.wallet(privateKey);
+const wallet = nona.wallet(privateKey);
 await wallet.send(receveiver, amount);
 ```
 
@@ -80,21 +76,21 @@ To receive a transaction, you must have an opened account (see [Open an account]
 To receive a single transaction:
 
 ```typescript
-const wallet = await nona.wallet(privateKey);
+const wallet = nona.wallet(privateKey);
 await wallet.receive();
 ```
 
 If you want to receive all pending transactions:
 
 ```typescript
-const wallet = await nona.wallet(privateKey);
+const wallet = nona.wallet(privateKey);
 await wallet.receiveAll();
 ```
 
 You can also use the websocket to listen and receive transactions in real time:
 
 ```typescript
-const wallet = await nona.wallet(privateKey);
+const wallet = nona.wallet(privateKey);
 // Will create a websocket connection, listen for incoming transactions and automatically receives them.
 const subscription = await wallet.listenAndReceive({
   // (Optional) next will be called each time a transaction is received
@@ -108,9 +104,33 @@ subscription.unsubscribe();
 // TODO: Set websocket documentation  
 More information about websocket, see [Websocket](#websocket).
 
+
 ## Nona API
 
+
+- [Wallet](#wallet)
+  - [Open](#open)
+  - [Send](#send)
+  - [Receive](#receive)
+  - [Receive all](#receive-all)
+  - [Receive multiple transactions](#receive-multiple-transactions)
+  - [Listen and receive](#listen-and-receive)
+- [Account](#account)
+  - [Receivable](#receivable)
+  - [Info](#info)
+  - [Balance](#balance)
+  - [Listen confirmation](#listen-confirmation)
+  - [History](#history)
+  - [Block count](#block-count)
+  - [Representative](#representative)
+  - [Weight](#weight)
+
+
 ### Wallet
+
+
+> [!NOTE]
+> All methods in the [account API](#account) are also available via the wallet object.
 
 > [!WARNING]  
 > This wallet API does not interact with the [wallet RPCs commands](https://docs.nano.org/commands/rpc-protocol/#wallet-rpcs) this naming is only for convenience.
@@ -118,7 +138,7 @@ More information about websocket, see [Websocket](#websocket).
 The wallet is the main object to interact with your account.
 
 ```typescript
-const wallet = await nona.wallet(privateKey);
+const wallet = nona.wallet(privateKey);
 ```
 
 #### Open
@@ -127,8 +147,8 @@ const wallet = await nona.wallet(privateKey);
 open(representative: string): Promise<string>
 ```
 
-Opens the account with the provided representative.
-The first transaction of an account is crafted in a [slightly different way](https://docs.nano.org/integration-guides/key-management/#first-receive-transaction). To open an account, you must have sent some funds to it with from another account.
+Opens the account with the provided representative.  
+The first transaction of an account is crafted in a [slightly different way](https://docs.nano.org/integration-guides/key-management/#first-receive-transaction). To open an account, you must have sent some funds to it from another account.  
 Returns the hash of the transaction.
 
 ```typescript
@@ -189,8 +209,8 @@ await wallet.receiveAll();
 receiveMultipleTransactions(hashes: string[]): Promise<string[]>
 ```
 
-Receives multiple pending transactions.
-From an array of hashes of the transactions to receive.
+Receives multiple pending transactions.  
+From an array of hashes of the transactions to receive.  
 Returns an array of hashes of the received blocks.
 
 ```typescript
@@ -211,7 +231,7 @@ Listens for incoming transactions and automatically receives them.
 Return a [Subscription](https://rxjs.dev/guide/subscription) object.
 
 ```typescript
-export interface WalletListAndReceiveParams {
+interface WalletListAndReceiveParams {
   /**
    * A function that will be called each time a transaction is received.
    * @param block The block that was received.
@@ -240,6 +260,308 @@ const subscription = await wallet.listenAndReceive({
 subscription.unsubscribe();
 ```
 
+> [!WARNING]
+> Depending on the node setup and sync status, multiple confirmation notifications for the same block hash may be sent by a single tracking mechanism.  
+> Theses block will call the `error` function with the error `Unreceivable`.
+
+### Account
+
+> [!NOTE]
+> Theses commands are also available using the [wallet](#wallet) object.
+
+All commands related to public account information.  
+
+You can create an account object with the following code:
+
+```typescript
+const address = 'nano_13e2ue...';
+const account = await nona.account(address);
+```
+
+You can also use your [wallet](#wallet) object:
+
+```typescript
+const wallet = nona.wallet(privateKey);
+````
+
+#### Receivable
+
+```typescript
+receivable(params?: ReceivableParams): Promise<Receivable>
+```
+
+Returns a list of block hashes which have not yet been received by this account.
+
+```typescript
+interface ReceivableParams {
+  /**
+   * Specifies the number of blocks to return.
+   * Default to 100.
+   */
+  count?: number;
+  /**
+   * Specifies whether to sort the response by block amount.
+   * Default to false.
+   */
+  sort?: boolean;
+}
+```
+Depending on the `sort` parameter, the blocks will be returned in two different ways.
+
+If `sort` is `false` (default), the blocks will be returned as an array of strings:
+
+```typescript
+const receivable = await account.receivable();
+console.log(receivable);
+// ['D83124BB...', '1208FF64...', ...]
+```
+
+If `sort` is `true`, the blocks will be returned as an object with the block hash as the key and the amount as the value:
+
+```typescript
+const receivable = await account.receivable({ sort: true });
+console.log(receivable);
+// { 'D83124BB...': 2, '1208FF64...': 1, ... }
+```
+
+#### Info
+
+```typescript
+info(params?: InfoParams): Promise<AccountInfo>
+```
+
+Returns general information for account.  
+Only works for accounts that have received their first transaction and have an entry on the ledger, will return "Account not found" otherwise.  
+To open an account, use [open](#open).
+
+```typescript
+interface InfoParams {
+  /**
+   * Specifies whether to include the representative in the response.
+   * Default to false.
+   */
+  representative?: boolean;
+  /**
+   * Specifies whether to return the raw balance.
+   * Default to false.
+   */
+  raw?: boolean;
+}
+````
+
+```typescript
+const info = await account.info();
+console.log(info);
+// {
+//   frontier: '0D60C42554478A2EDAD18AD5E975422297E62082E612C60ECABBDD4D01B65D46',
+//   open_block: '92CBCAC62345F58A58CE513652D22BD6E13CB094BF6F8D825DEE01CE54718868',
+//   representative_block: '0D60C42253478E2ADAD18AD5E975426297E62082E612C60ECAACDD4D01B65D46',
+//   balance: '2.3',
+//   modified_timestamp: '1712846889',
+//   block_count: '82',
+//   account_version: '2',
+//   confirmation_height: '82',
+//   confirmation_height_frontier: '0D60C22554478E2EDAD81BD5E975426297E62082E612C60ECAACDD4D01B65D46'
+// }
+```
+
+#### Balance
+
+```typescript
+balance({ raw = false }: { raw?: boolean }): Promise<AccountBalance>
+```
+
+Returns how many nano is owned and how many have not yet been received by account.
+Set `raw` to `true` to return the balance in raw unit.
+
+```typescript
+const balance = await account.balance();
+console.log(balance);
+// { balance: '2.3', receivable: '5', pending: '0' }
+```
+
+`balance` is the total amount of nano owned by the account.  
+`receivable` is the amount of nano that has not yet been received by the account.
+
+> [!NOTE]
+> `pending` was deprecated in favor of `receivable`. For compatibility reasons both terms are still available for many calls and in responses.  
+> For more details see: https://docs.nano.org/releases/release-v24-0/#pendingreceivable-term-rpc-updates.
+
+
+#### Listen confirmation
+
+```typescript
+listenConfirmation(params: ListenConfirmationParams): Subscription
+```
+
+Listen for all confirmed blocks for the related account.
+
+```typescript
+export interface ListenConfirmationParams {
+  /**
+   * A function that will be called each time a transaction is received.
+   * @param block The block that was received.
+   */
+  next: (block: ConfirmationBlock) => unknown;
+  /**
+   * A function that will be called when an error occurs.
+   * @param error The error that occurred.
+   */
+  error?: (error: unknown) => unknown;
+  /**
+   * A function that will be called when the listener completes.
+   */
+  complete?: () => unknown;
+  /**
+   * A filter that will be used to filter the confirmation blocks.
+   */
+  filter?: ConfirmationFilter;
+}
+
+export interface ConfirmationFilter {
+  /** List of block subtypes to filter the confirmation blocks. */
+  subtype?: string[];
+  /** Account addresses that sent the transaction. */
+  from?: string[];
+  /** Account addresses that received the transaction. */
+  to?: string[];
+}
+````
+
+Listen all sent confirmation blocks for the account from a specific address:
+
+```typescript
+const subscription = await account.listenConfirmation({
+  next: (transactionBlock) => console.log('Received confirmation', transactionBlock),
+  filter: {
+    subtype: ['send'],
+    from: ['nano_1send...'],
+  },
+});
+```
+
+> [!WARNING]
+> Depending on the node setup and sync status, multiple confirmation notifications for the same block hash may be sent by a single tracking mechanism.  
+> In order to prevent potential issues, integrations must track these block hashes externally to the node and prevent any unwanted actions based on multiple notifications.
+
+#### History
+
+```typescript
+history(params?: AccountHistoryParams): Promise<AccountHistory>
+```
+
+Retrieves the account history.  
+Returns only send & receive blocks by default (unless raw is set to true - see optional parameters below): change, state change & state epoch blocks are skipped, open & state open blocks will appear as receive, state receive/send blocks will appear as receive/send entries.  
+Response will start with the latest block for the account (the frontier), and will list all blocks back to the open block of this account when "count" is set to "-1".  
+
+```typescript
+export interface AccountHistoryParams {
+  /** Number of blocks to return. Default to 100. */
+  count?: number;
+  /** Hash of the block to start from. */
+  head?: string;
+  /** Number of blocks to skip. */
+  offset?: number;
+  /** Reverse order */
+  reverse?: boolean;
+  /** Results will be filtered to only show sends/receives connected to the provided account(s). */
+  accounts?: string[];
+  /**
+   * if set to true instead of the default false, returns all blocks history and output all parameters of the block itself.
+   */
+  raw?: boolean;
+}
+```
+
+```typescript
+const history = await account.history();
+console.log(history);
+// {
+//   history: [
+//     {
+//       type: 'send',
+//       account: 'nano_13dtu...',
+//       amount: '1.23',
+//       hash: 'C43ED22C09...',
+//       local_timestamp: '1712846889',
+//       height: '82',
+//     },
+//     [...]
+//   ],
+//   previous: 'D83124BB...',
+// }
+```
+
+To paginate the history, you can use the `head` parameter with the `previous` value from the previous call:
+
+```typescript
+let hasNext = true;
+let head: string | undefined;
+while (hasNext) {
+  const { history, previous } = await account.history({ head });
+  console.log(history);
+
+  if (previous) {
+    head = previous;
+  } else {
+    hasNext = false;
+  }
+}
+```
+
+If `reverse` is `true`, use `next` instead of `previous`.
+
+#### Block count
+
+```typescript
+blockCount(): Promise<number>
+```
+
+Returns the number of blocks for this account.
+  
+```typescript
+const blockCount = await account.blockCount();
+console.log(blockCount);
+// 42
+```
+
+#### Representative
+
+```typescript
+representative(): Promise<string>
+```
+
+Returns the representative for this account.
+
+```typescript
+const representative = await account.representative();
+console.log(representative);
+// nano_3rep...
+```
+
+#### Weight
+
+```typescript
+weight(): Promise<string>
+```
+
+Returns the voting weight for this account in nano unit (default).
+
+```typescript
+const weight = await account.weight();
+console.log(weight);
+// 123.456789
+```
+
+Set `raw` to `true` to return the weight in raw unit.
+
+```typescript
+const weight = await account.weight({ raw: true });
+console.log(weight);
+// 123456789000000000000000000000000
+```
+
+
 ## TODO
 
 - [ ] Change options to params in params methods
@@ -252,6 +574,3 @@ subscription.unsubscribe();
 - [ ] Check integration with nano.to
 - [ ] Tests
 
-```
-
-```
