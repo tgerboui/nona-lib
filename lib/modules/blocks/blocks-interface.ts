@@ -1,7 +1,7 @@
 export interface CreateBlockParams {
   /** The account the block is being created for. */
   account: string;
-  /** Final balance for account after block creation. */
+  /** Final balance for account after block creation. In raw unit */
   balance: string;
   /** Private key of the account */
   key: string;
