@@ -38,7 +38,7 @@ const seed = await KeyService.generateSeed();
 const { privateKey, publicKey, address } = await nona.key.create(seed);
 ```
 
-These keys are securely generated locally using the [nanocurrency-js](https://github.com/marvinroger/nanocurrency-js/tree/master/packages/nanocurrency) package.
+These keys are generated locally using the [nanocurrency-js](https://github.com/marvinroger/nanocurrency-js/tree/master/packages/nanocurrency) package.
 
 ### Open an account
 
@@ -130,6 +130,15 @@ For more details about websocket, see [Websocket](#websocket).
   - [Create block](#create-block)
   - [Process block](#process-block)
   - [Block info](#block-info)
+- [Key](#key)
+  - [Create](#create)
+  - [Expand](#expand)
+- [Key Service](#key-service)
+  - [Generate seed](#generate-seed)
+  - [Get secret key](#get-secret-key)
+  - [Get public key](#get-public-key)
+  - [Get address](#get-address)
+- [Rpc](#rpc)
 
 ### Wallet
 
@@ -692,14 +701,13 @@ You have currently 3 nano in your account.
 ```typescript
 const wallet = nona.wallet(privateKey);
 const info = await wallet.info();
-const sendAddress = 'nano_1send...';
-const sendAmount = 1;
+const recipient = 'nano_1send...';
 
 const sendBlock = await this.blocks.create({
   // Current account 
   account: wallet.address,
-  // Final balance for account after block creation. (here: current balance - send amount) 
-  balance: '2',
+  // Final balance for account after block creation in raw unit (here: current balance - send amount).
+  balance: '2000000000000000000000000000000',
   // The block hash of the previous block on this account's block chain ("0" for first block). 
   previous: info.frontier,
   // The representative account for the account. 
@@ -707,7 +715,7 @@ const sendBlock = await this.blocks.create({
   // If the block is sending funds, set link to the public key of the destination account.
   // If it is receiving funds, set link to the hash of the block to receive.
   // If the block has no balance change but is updating representative only, set link to 0. 
-  link: sendAddress,
+  link: recipient,
   // Private key of the account 
   key: privateKey,
 });
@@ -742,6 +750,110 @@ Retrieves information about a specific block.
 ```typescript
 const hash = 'D83124BB...';
 const info = await blocks.info(hash);
+```
+
+### Key
+
+You can access to the key object with the following code:
+
+```typescript
+const blocks = nona.key;
+```
+
+#### Create
+
+> [!NOTE]
+> The keys are generated locally using the [nanocurrency-js](https://github.com/marvinroger/nanocurrency-js/tree/master/packages/nanocurrency) package.
+
+
+```typescript
+create(seed?: string): Promise<AccountKeys>
+```
+
+Create keys for an account.
+
+```typescript
+const { privateKey, publicKey, address } = await nona.key.create();
+```
+
+#### Expand
+
+```typescript
+expand(privateKey: string): AccountKeys
+```
+
+Expand a private key into public key and address.
+
+```typescript
+const { publicKey, address } = nona.key.expand(privateKey);
+```
+
+### Key Service
+
+Service to generate seeds and keys.
+
+#### Generate seed
+
+```typescript
+KeyService.generateSeed(): Promise<string>
+```
+
+Generates a random seed.
+
+```typescript
+const seed = await KeyService.generateSeed();
+```
+
+#### Get secret key
+
+```typescript
+KeyService.getSecretKey(seed: string, index: number): string
+```
+
+Derive a secret key from a seed, given an index.
+
+```typescript
+const privateKey = KeyService.getSecretKey(seed, 0);
+```
+
+#### Get public key
+
+```typescript
+KeyService.getPublicKey(privateKey: string): string
+```
+
+Derive a public key from a secret key.
+
+```typescript
+const publicKey = KeyService.getPublicKey(privateKey);
+```
+
+#### Get address
+
+```typescript
+KeyService.getAddress(publicKey: string): string
+```
+
+Derive an address from a public key.
+
+```typescript
+const address = KeyService.getAddress(publicKey);
+```
+
+### Rpc
+
+if you prefer to call RPC directly you can use `nona.rpc`.
+
+```typescript
+rpc(action: string, body?: object): Promise<unknown>
+```
+
+Call `account_info` RPC command.
+
+```typescript
+const info = await nona.rpc('account_info', {
+  account: 'nano_13e2ue...',
+});
 ```
 
 ## TODO
