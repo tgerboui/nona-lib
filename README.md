@@ -1,23 +1,46 @@
 # Nona Lib
 
-// TODO: Review introduction  
-Typescript client to interact with your Nano node.
-This client simplifies the complexities involved in communicating with a Nano node, providing streamlined processes for sending and receiving transactions, retrieving wallet, managing websockets and more.
-Start integrating Nano transactions into your applications seamlessly with our easy-to-use Typescript client.
+Nona Lib is a powerful and user-friendly TypeScript library designed to simplify interactions with the Nano cryptocurrency network.  
+
+Whether you're developing wallet software, integrating Nano payments into your application, or just exploring the possibilities of Nano's block lattice structure, Nona Lib provides a comprehensive set of tools to manage accounts, perform transactions, and query blockchain data efficiently and securely through your Nano node.
+
+**Keys features**
+
+- **Type Safe**: fully implemented in TypeScript, providing strong type safety and seamless integration with TypeScript projects.
+- **Easy Wallet Management**: Manage Nano accounts effortlessly, with functions to create, open, send and receive transactions.
+- **Real-Time Updates via Websocket**: Utilize websockets for real-time transaction reception, confirmation tracking, and more.
+- **Promise based API**: All methods return promises for easy async/await usage.
 
 ## Installation
 
-// TODO: Review the installation instructions
-`npm install nona-lib`
+> [!NOTE]
+> Before you begin using Nona Lib, ensure that your Nano node is configured with `enable_control` set to true, as the library requires permission to perform certain operations on the node.  
+> More information on how to configure your node can be found [here](https://docs.nano.org/running-a-node/configuration/#enable-control).
 
-// TODO: Mention information about RPC enable_control
+To install Nona Lib, run the following command in your project directory:
+  
+```bash
+npm install nona-lib
+```
 
 ## Getting Started
 
-// TODO: Create getting started guide
-
+If your node run on localhost with default port:
 ```typescript
+import { Nona } from 'nona-lib';
 
+const nona = new Nona();
+```
+
+
+If your node run on a custom port, or on a remote server, you can specify the urls:
+```typescript
+import { Nona } from 'nona-lib';
+
+const nona = new Nona({ 
+  url: 'http://localhost:7076',
+  websocketUrl: 'ws://localhost:7078',
+});
 ```
 
 ## Basic Usage
