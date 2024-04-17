@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
 export const BlockCount = z.object({
+  /** The total number of blocks in the ledger. This includes all send, receive, open, and change blocks. */
   count: z.string(),
+  /** The number of blocks that have been downloaded but not yet confirmed. These blocks are waiting in the processing queue. */
   unchecked: z.string(),
+  /** The number of blocks that have been confirmed and cemented in the ledger. Cemented blocks are confirmed irreversible transactions. */
   cemented: z.string(),
 });
 export type BlockCount = z.infer<typeof BlockCount>;
@@ -28,6 +31,7 @@ export const BlockProcess = z.object({
 });
 export type BlockProcess = z.infer<typeof BlockProcess>;
 
+// TODO: Comment each fields
 export const BlockInfo = z.object({
   block_account: z.string(),
   amount: z.string(),
