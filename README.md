@@ -101,8 +101,7 @@ const subscription = await wallet.listenAndReceive({
 subscription.unsubscribe();
 ```
 
-// TODO: Set websocket documentation  
-More information about websocket, see [Websocket](#websocket).
+For more details about websocket, see [Websocket](#websocket).
 
 
 ## Nona API
@@ -561,16 +560,96 @@ console.log(weight);
 // 123456789000000000000000000000000
 ```
 
+### Websocket
+
+> [!NOTE]  
+> All the webscoket related methods use Rxjs Observables and return a Subscription object. For more information about observables and subscriptions, see the [Rxjs documentation](https://rxjs.dev/).
+
+At the first subscription, the websocket connection to the node will be established.  
+If all subscriptions are unsubscribed, the connection will be closed.
+
+You can access to the websocket object with the following code:
+
+```typescript
+const ws = nona.ws;
+```
+
+#### Confirmation
+
+```typescript
+confirmation(params: WebSocketConfirmationParams): Subscription
+```
+
+Listens for confirmed blocks.  
+Return a [Subscription](https://rxjs.dev/guide/subscription) object.
+
+```typescript
+interface WebSocketConfirmationParams {
+  /**
+   * A function that will be called each time a transaction is received.
+   * @param block The block that was received.
+   */
+  next: (block: ConfirmationBlock) => unknown;
+  /**
+   * A function that will be called when an error occurs.
+   * @param error The error that occurred.
+   */
+  error?: (error: unknown) => unknown;
+  /**
+   * A function that will be called when the listener completes.
+   */
+  complete?: () => unknown;
+  /**
+   * A filter that will be used to filter the confirmation blocks.
+   */
+  filter?: ConfirmationFilter;
+}
+
+interface ConfirmationFilter {
+  /** List of account addresses to filter the confirmation blocks. */
+  accounts?: string[];
+  /** List of block subtypes to filter the confirmation blocks. */
+  subtype?: string[];
+  /** Account addresses that sent the transaction. */
+  from?: string[];
+  /** Account addresses that received the transaction. */
+  to?: string[];
+}
+```
+
+Subscribe to all new confirmed blocks on the network:
+
+```typescript
+const subscription = await nona.ws.confirmation({
+  // next will be called each time a transaction is received
+  next: (confirmationBlock) => console.log('Received confirmation', confirmationBlock),
+});
+
+// Don't forget to unsubscribe when you don't need it anymore
+subscription.unsubscribe();
+```
+
+Subscribe to all new sent confirmation blocks to a specific account:
+
+```typescript
+const subscription = await nona.ws.confirmation({
+  next: (confirmationBlock) => console.log('Received confirmation', confirmationBlock),
+  filter: {
+    subtype: ['send'],
+    to: ['nano_1send...'],
+  },
+});
+```
 
 ## TODO
 
-- [ ] Change options to params in params methods
+- [ ] Custom filter on websocket
 - [ ] Handle errors
   - [ ] Handle connection errors
   - [ ] Handle format errors
   - [ ] Handle response errors from the node
-- [ ] Websocket support
-- [ ] Work server options
+- [ ] Work generation
+  - [ ] Local work generation
+  - [ ] Work server
 - [ ] Check integration with nano.to
 - [ ] Tests
-
