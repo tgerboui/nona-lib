@@ -1,6 +1,6 @@
 import { KeyService } from '../../services/hash/key-service';
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { AccountKeys } from './key-interface';
+import { AccountKeys, ExpandedKeys } from './key-interface';
 
 export class Key extends RpcConsummer {
   /**
@@ -32,11 +32,13 @@ export class Key extends RpcConsummer {
    * @param privateKey private key to expand
    * @returns public key and address
    */
-  public expand(privateKey: string): AccountKeys {
+  public expand(privateKey: string): ExpandedKeys {
+    const publicKey = KeyService.getPublicKey(privateKey);
+    const address = KeyService.getAddress(publicKey);
+
     return {
-      privateKey: privateKey,
-      publicKey: KeyService.getPublicKey(privateKey),
-      address: KeyService.getAddress(KeyService.getPublicKey(privateKey)),
+      publicKey,
+      address,
     };
   }
 }
