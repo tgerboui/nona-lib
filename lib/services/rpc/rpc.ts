@@ -9,6 +9,12 @@ export class Rpc {
     });
   }
 
+  /**
+   * Makes an RPC call to the node.
+   * @param action - The action to be performed.
+   * @param body - The optional request body.
+   * @returns A Promise that resolves to the response data.
+   */
   async call(action: string, body?: object): Promise<unknown> {
     // TODO: Handle error
     const res = await this.instance.post('/', {
