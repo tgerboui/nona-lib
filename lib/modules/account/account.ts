@@ -115,7 +115,7 @@ export class Account extends RpcConsummer {
    * @returns Subscription object that can be used to unsubscribe from the listener.
    */
   public listenConfirmation(params: ListenConfirmationParams): Subscription {
-    return this.websocket.confirmation.subscribe({
+    return this.websocket.confirmation({
       ...params,
       filter: { ...params.filter, accounts: [this.address] },
     });
