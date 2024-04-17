@@ -1,5 +1,5 @@
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { Telemetry, Version, uptimeSchema } from './node-schema';
+import { Telemetry, uptimeSchema, Version } from './node-schema';
 
 /**
  * Handle all node and network related operations
@@ -7,7 +7,7 @@ import { Telemetry, Version, uptimeSchema } from './node-schema';
  */
 export class Node extends RpcConsummer {
   /**
-   * Return metrics from other nodes on the network.
+   * Returns metrics from other nodes on the network.
    * Summarized view of the whole network.
    */
   public async telemetry(): Promise<Telemetry> {
@@ -16,7 +16,7 @@ export class Node extends RpcConsummer {
   }
 
   /**
-   * Return node uptime in seconds
+   * Returns node uptime in seconds
    */
   public async uptime(): Promise<number> {
     const res = await this.rpc.call('uptime');
