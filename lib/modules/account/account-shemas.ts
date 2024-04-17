@@ -34,12 +34,10 @@ export const AccountInfo = z.object({
 });
 export type AccountInfo = z.infer<typeof AccountInfo>;
 
-export const AccountInfoRepresentative = AccountInfo.and(
-  z.object({
-    /** Account address of the currently set representative for this account. */
-    representative: z.string(),
-  }),
-);
+export const AccountInfoRepresentative = AccountInfo.extend({
+  /** Account address of the currently set representative for this account. */
+  representative: z.string(),
+});
 export type AccountInfoRepresentative = z.infer<typeof AccountInfoRepresentative>;
 
 export const AccountBalance = z.object({
@@ -61,21 +59,62 @@ export const AccountBalance = z.object({
 });
 export type AccountBalance = z.infer<typeof AccountBalance>;
 
-export const AccountHistory = z.object({
-  history: z.array(
-    z.object({
-      type: z.string(),
-      account: z.string(),
-      amount: z.string().transform(UnitService.rawToNanoString),
-      hash: z.string(),
-      local_timestamp: z.string(),
-      height: z.string(),
-    }),
-  ),
+export const AccountHistoryPagination = z.object({
+  /** Hash of the previous block in the account's blockchain. */
   previous: z.string().optional(),
+  /** Hash of the next block in the account's blockchain. */
   next: z.string().optional(),
 });
+export type AccountHistoryPagination = z.infer<typeof AccountHistoryPagination>;
+
+export const AccountHistoryBlock = z.object({
+  /** Account address of the block. */
+  account: z.string(),
+  /** Amount of the block in nano unit */
+  amount: z.string().transform(UnitService.rawToNanoString),
+  /** Type of block. */
+  type: z.string(),
+  /** Hash of the block. */
+  hash: z.string(),
+  /** UNIX timestamp indicating the time the block was added to the ledger. */
+  local_timestamp: z.string().transform(Number),
+  /** Height of the block in the account's blockchain. */
+  height: z.string().transform(Number),
+});
+export type AccountHistoryBlock = z.infer<typeof AccountHistoryBlock>;
+
+export const AccountHistoryRawBlock = AccountHistoryBlock.extend({
+  /** Account address of the block. Not present if it's a 'receive' or 'send' block. */
+  account: z.string().optional(),
+  /** Amount of the block in raw unit. Not present if it's a 'receive' or 'send' block. */
+  amount: z.string().optional(),
+  /** Account address of the representative for this account. */
+  representative: z.string().optional(),
+  /** Link block hash. */
+  link: z.string().optional(),
+  /** Hash of the previous block in the account's blockchain. Not present if it's a 'open' block. */
+  previous: z.string().optional(),
+  /** Balance of the account after this block in raw unit. Not present if it's a 'change' block */
+  balance: z.string().optional(),
+  /** Type of the block */
+  subtype: z.string().optional(),
+  /** Whether the block has been confirmed by the network. */
+  confirmed: z.string().transform(Boolean),
+  /** Work value of the block. */
+  work: z.string(),
+  /** Signature of the block. */
+  signature: z.string(),
+});
+
+export const AccountHistory = AccountHistoryPagination.extend({
+  history: z.array(AccountHistoryBlock),
+});
 export type AccountHistory = z.infer<typeof AccountHistory>;
+
+export const AccountRawHistory = AccountHistoryPagination.extend({
+  history: z.array(AccountHistoryRawBlock),
+});
+export type AccountRawHistory = z.infer<typeof AccountRawHistory>;
 
 export const accountBlockCountSchema = z.object({
   block_count: z.string(),

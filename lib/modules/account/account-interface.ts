@@ -60,18 +60,23 @@ export type ListenConfirmationParams = Omit<WebSocketConfirmationParams, 'filter
   filter?: Omit<ConfirmationFilter, 'accounts'>;
 };
 
-// TODO: Docs
 export interface AccountHistoryParams {
   /** Number of blocks to return. Default to 100. */
-  count?: number; /// Default 100
+  count?: number;
   /** Hash of the block to start from. */
   head?: string;
   /** Number of blocks to skip. */
   offset?: number;
   /** Reverse order */
   reverse?: boolean;
-  /** Filter the blocks */
-  account_filter?: string[];
-  // TODO: Handle raw format
-  // raw?: string;
+  /** Results will be filtered to only show sends/receives connected to the provided account(s). */
+  accounts?: string[];
+  /**
+   * if set to true instead of the default false, returns all blocks history and output all parameters of the block itself.
+   */
+  raw?: boolean;
 }
+
+export type AccountHistoryParamsRaw = AccountHistoryParams & {
+  raw: true;
+};

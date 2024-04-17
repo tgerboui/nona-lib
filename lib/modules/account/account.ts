@@ -6,6 +6,7 @@ import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { NonaWebSocket } from '../websocket/websocket';
 import {
   AccountHistoryParams,
+  AccountHistoryParamsRaw,
   InfoParams,
   InfoParamsWithRepresentative,
   ListenConfirmationParams,
@@ -22,6 +23,7 @@ import {
   AccountHistory,
   AccountInfo,
   AccountInfoRepresentative,
+  AccountRawHistory,
   accountWeightSchema,
   ReceivableHashes,
   ReceivableValues,
@@ -119,24 +121,34 @@ export class Account extends RpcConsummer {
     });
   }
 
-  // TODO: Implement raw
   /**
    * Retrieves the account history.
+   * Returns only send & receive blocks by default (unless raw is set to true - see optional parameters below): change, state change & state epoch blocks are skipped, open & state open blocks will appear as receive, state receive/send blocks will appear as receive/send entries.
+   * Response will start with the latest block for the account (the frontier), and will list all blocks back to the open block of this account when "count" is set to "-1".
    *
-   * @param {AccountHistoryParams} [params] - Optional parameters for the account history request.
-   * @param {number} [params.count=100] - The number of history entries to retrieve.
+   * @param {{ count, head, offset, reverse, accounts }} params - Optional parameters for the account history request.
+   * @param {{ raw }} raw - If set to true instead of the default false, output all parameters of the block itself and include change, state change & state epoch blocks.
    * @returns {Promise<AccountHistory>} - A promise that resolves to the account history.
    */
-  public async history({
-    count = 100,
-    ...params
-  }: AccountHistoryParams = {}): Promise<AccountHistory> {
+  public async history(params: AccountHistoryParamsRaw): Promise<AccountRawHistory>;
+  public async history(params?: AccountHistoryParams): Promise<AccountHistory>;
+  public async history({ count = 100, raw = false, ...params }: AccountHistoryParams = {}): Promise<
+    AccountHistory | AccountRawHistory
+  > {
+    const { accounts, head, offset, reverse } = params;
     const res = await this.rpc.call('account_history', {
       account: this.address,
-      ...params,
+      head,
+      offset,
+      reverse,
       count,
+      raw,
+      account_filter: accounts,
     });
 
+    if (raw) {
+      return this.parseHandler(res, AccountRawHistory);
+    }
     return this.parseHandler(res, AccountHistory);
   }
 
