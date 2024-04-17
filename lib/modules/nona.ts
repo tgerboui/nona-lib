@@ -3,6 +3,7 @@ import { Account } from './account/account';
 import { Blocks } from './blocks/blocks';
 import { Key } from './key/key';
 import { Node } from './node/node';
+import { NonaParams } from './nona/nona-interface';
 import { Wallet } from './wallet/wallet';
 import { NonaWebSocket } from './websocket/websocket';
 
@@ -14,11 +15,12 @@ export class Nona {
   public key: Key;
   public node: Node;
 
-  // TODO: Set options in interface
-  // TODO: Set default values in interface
-  constructor(url = 'http://localhost:7076', webSocketUrl = 'ws://localhost:7078') {
+  constructor({
+    url = 'http://localhost:7076',
+    websocketUrl = 'ws://localhost:7078',
+  }: NonaParams = {}) {
     this.remoteProcedureCall = new Rpc({ url });
-    this.ws = new NonaWebSocket({ url: webSocketUrl });
+    this.ws = new NonaWebSocket({ url: websocketUrl });
     this.blocks = new Blocks(this.remoteProcedureCall);
     this.key = new Key(this.remoteProcedureCall);
     this.node = new Node(this.remoteProcedureCall);
