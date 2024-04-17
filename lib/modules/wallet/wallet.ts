@@ -1,14 +1,12 @@
-import BigNumber from 'bignumber.js';
 import { Subscription } from 'rxjs';
 
 import { KeyService } from '../../services/hash/key-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { UnitService } from '../../services/unit/unit-service';
+import { NonaBigNumber } from '../../shared/utils/big-number';
 import { Account } from '../account/account';
 import { Blocks } from '../blocks/blocks';
-import {
-  ConfirmationBlock,
-} from '../websocket/confirmation/websocket-confirmation-interface';
+import { ConfirmationBlock } from '../websocket/confirmation/websocket-confirmation-interface';
 import { NonaWebSocket } from '../websocket/websocket';
 import { WalletListAndReceiveParams } from './wallet-interface';
 
@@ -88,7 +86,7 @@ export class Wallet extends Account {
 
     // Get hash info
     const hashInfo = await this.blocks.info(receiveHash);
-    const finalBalance = BigNumber(info.balance).plus(hashInfo.amount);
+    const finalBalance = NonaBigNumber(info.balance).plus(hashInfo.amount);
 
     // Generate work and format block
     const block = await this.blocks.create({
@@ -114,7 +112,7 @@ export class Wallet extends Account {
       representative: true,
       raw: true,
     });
-    let balance = new BigNumber(info.balance);
+    let balance = new NonaBigNumber(info.balance);
     let previous = info.frontier;
     const receivedHashes: string[] = [];
 
@@ -170,7 +168,7 @@ export class Wallet extends Account {
       representative: true,
       raw: true,
     });
-    const balance = new BigNumber(info.balance);
+    const balance = new NonaBigNumber(info.balance);
     // Convert nano amout to raw amount
     const rawAmount = UnitService.nanoToRaw(amount);
 
