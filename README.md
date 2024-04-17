@@ -161,6 +161,10 @@ For more details about websocket, see [Websocket](#websocket).
   - [Get secret key](#get-secret-key)
   - [Get public key](#get-public-key)
   - [Get address](#get-address)
+- [Node](#node)
+  - [Telemetry](#telemetry)
+  - [Uptime](#uptime)
+  - [Version](#version)
 - [Rpc](#rpc)
 
 ### Wallet
@@ -861,6 +865,53 @@ Derive an address from a public key.
 
 ```typescript
 const address = KeyService.getAddress(publicKey);
+```
+
+### Node
+
+You can access to the node object with the following code:
+
+```typescript
+const node = nona.node;
+```
+
+#### Telemetry
+
+```typescript
+telemetry(): Promise<Telemetry>
+```
+
+Return metrics from other nodes on the network.
+Summarized view of the whole network.
+
+```typescript
+const telemetry = await node.telemetry();
+```
+
+#### Uptime 
+
+```typescript
+uptime(): Promise<number>
+```
+
+Return node uptime in seconds.
+
+```typescript
+const uptime = await node.uptime();
+console.log(uptime);
+// 832870
+```
+
+#### Version
+
+```typescript
+version(): Promise<Version>
+```
+
+Returns version information for RPC, Store, Protocol (network), Node (Major & Minor version).
+
+```typescript
+const version = await node.version();
 ```
 
 ### Rpc
