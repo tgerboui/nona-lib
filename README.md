@@ -16,6 +16,7 @@ Whether you're developing wallet software, integrating Nano payments into your a
 - [Getting Started](#getting-started)
 - [Basic Usage](#basic-usage)
 - [Nona API](#nona-api)
+- [Handling Errors](#handling-errors)
 
 
 ## Installation
@@ -933,6 +934,30 @@ Call `account_info` RPC command.
 const info = await nona.rpc('account_info', {
   account: 'nano_13e2ue...',
 });
+```
+
+## Handling Errors
+
+All handled errors are instances of `NonaError`.  
+Each types of errors are extended from `NonaError` and have a specific instance.
+
+`NonaError` - Base class for all errors and generic error.  
+`NonaNetworkError` - Network error, likely related to the node connection.  
+`NonaRpcError` - Error related to the RPC call response. If this occured while using the library and you are not using custom RPC call, please report it.  
+`NonaParseError` - Error related to the response parsing. If this occured while using the library, please report it.  
+`NonaUserError` - Error related to the user input.  
+For example, if you try to send a transaction with an insufficient balance:
+
+```typescript
+try {
+  await wallet.send('nano_1rece...', 100);
+} catch (error) {
+  if (error instanceof NonaUserError && error.message === 'Insufficient balance') {
+    console.log('You don\'t have enough balance to send this amount');
+  } else {
+    console.error('An error occurred', error);
+  }
+}
 ```
 
 ## TODO
