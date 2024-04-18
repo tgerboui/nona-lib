@@ -1,5 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 
+import { NonaRpcError } from '../../shared/errors/rpc-error';
+import { ErrorService } from '../error/error-service';
+
 export class Rpc {
   instance: AxiosInstance;
 
@@ -15,18 +18,28 @@ export class Rpc {
    * @param body - The optional request body.
    * @returns A Promise that resolves to the response data.
    */
-  async call(action: string, body?: object): Promise<unknown> {
-    // TODO: Handle error
-    const res = await this.instance.post('/', {
-      action,
-      ...body,
-    });
+  public async call(action: string, body?: object): Promise<unknown> {
+    try {
+      const res = await this.instance.post('/', {
+        action,
+        ...body,
+      });
 
-    if (res.data.error && res.data.error === 'Unable to parse JSON') {
-      // TODO: Better error handling
-      throw new Error('Unable to parse JSON');
+      if (res.data.error) {
+        this.handleResponseDataError(res.data.error);
+      }
+
+      return res.data;
+    } catch (error) {
+      ErrorService.handleError(error);
+    }
+  }
+
+  private handleResponseDataError(error: unknown): never {
+    if (typeof error === 'string') {
+      throw new NonaRpcError(error);
     }
 
-    return res.data;
+    throw new NonaRpcError('Unknown error occurred from RPC call');
   }
 }

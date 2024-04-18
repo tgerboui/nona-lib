@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { KeyService } from '../../services/hash/key-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { UnitService } from '../../services/unit/unit-service';
+import { NonaUserError } from '../../shared/errors/user-error';
 import { NonaBigNumber } from '../../shared/utils/big-number';
 import { Account } from '../account/account';
 import { Blocks } from '../blocks/blocks';
@@ -43,7 +44,7 @@ export class Wallet extends Account {
     // Highest hash
     const lastHashes = await this.receivable({ count: 1, sort: true });
     if (Object.keys(lastHashes).length === 0) {
-      throw new Error('No receivable blocks');
+      throw new NonaUserError('No receivable blocks');
     }
     const hash = Object.keys(lastHashes)[0];
     const hashValue = lastHashes[hash];
@@ -78,7 +79,7 @@ export class Wallet extends Account {
     if (!receiveHash) {
       const receivable = await this.receivable({ count: 1 });
       if (receivable.length === 0) {
-        throw new Error('No receivable blocks');
+        throw new NonaUserError('No receivable blocks');
       }
       receiveHash = receivable[0];
     }
@@ -171,8 +172,8 @@ export class Wallet extends Account {
     // Convert nano amout to raw amount
     const rawAmount = UnitService.nanoToRaw(amount);
 
-    if (balance.isLessThan(amount)) {
-      throw new Error('Insufficient balance');
+    if (balance.isLessThan(rawAmount)) {
+      throw new NonaUserError('Insufficient balance');
     }
     const finalBalance = balance.minus(rawAmount);
 

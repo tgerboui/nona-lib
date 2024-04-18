@@ -1,24 +1,16 @@
 import { z } from 'zod';
+
+import { ErrorService } from '../../services/error/error-service';
 import { Rpc } from '../../services/rpc/rpc';
-import { rpcError } from './rpc-consumer-schema';
 
 export class RpcConsummer {
   constructor(protected rpc: Rpc) {}
 
-  // TODO: Create class for errors
-  parseHandler<T>(data: unknown, schema: z.Schema<T>): T {
+  public parseHandler<T extends z.Schema>(data: unknown, schema: T): z.output<T> {
     try {
       return schema.parse(data);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Rpc error
-        const parsedError = rpcError.safeParse(data);
-        if (parsedError.success) {
-          throw new Error(parsedError.data.error);
-        }
-      }
-      // TODO: Better error handling
-      throw new Error('Response format');
+      ErrorService.handleError(error);
     }
   }
 }
