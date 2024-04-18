@@ -4,17 +4,24 @@ Nona Lib is a powerful and user-friendly TypeScript library designed to simplify
 
 Whether you're developing wallet software, integrating Nano payments into your application, or just exploring the possibilities of Nano's block lattice structure, Nona Lib provides a comprehensive set of tools to manage accounts, perform transactions, and query blockchain data efficiently and securely through your Nano node.
 
-**Keys features**
+**Keys Features**
 
-- **Type Safe**: fully implemented in TypeScript, providing strong type safety and seamless integration with TypeScript projects.
 - **Easy Wallet Management**: Manage Nano accounts effortlessly, with functions to create, open, send and receive transactions.
 - **Real-Time Updates via Websocket**: Utilize websockets for real-time transaction reception, confirmation tracking, and more.
-- **Promise based API**: All methods return promises for easy async/await usage.
+- **Type Safe**: Fully implemented in TypeScript, providing strong type safety and seamless integration with TypeScript projects.
+
+## Table of contents
+
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Basic Usage](#basic-usage)
+- [Nona API](#nona-api)
+
 
 ## Installation
 
 > [!NOTE]
-> Before you begin using Nona Lib, ensure that your Nano node is configured with `enable_control` set to true, as the library requires permission to perform certain operations on the node.  
+> Before you begin using Nona Lib, ensure that your Nano node's `enable_control` is set to true, as the library requires this permission to perform certain operations.  
 > More information on how to configure your node can be found [here](https://docs.nano.org/running-a-node/configuration/#enable-control).
 
 To install Nona Lib, run the following command in your project directory:
@@ -25,7 +32,7 @@ npm install nona-lib
 
 ## Getting Started
 
-If your node run on localhost with default port:
+If your node runs on localhost with the default port:
 ```typescript
 import { Nona } from 'nona-lib';
 
@@ -33,7 +40,7 @@ const nona = new Nona();
 ```
 
 
-If your node run on a custom port, or on a remote server, you can specify the urls:
+If your node runs on a custom port or on a remote server, you can specify the URLs:
 ```typescript
 import { Nona } from 'nona-lib';
 
@@ -53,7 +60,7 @@ You can simply create a new account with the following code:
 const { privateKey, publicKey, address } = await nona.key.create();
 ```
 
-Or from a seed :
+Or from a seed:
 
 ```typescript
 // Use KeyService to generate a seed or provide your own
@@ -66,7 +73,7 @@ These keys are generated locally using the [nanocurrency-js](https://github.com/
 ### Open an account
 
 Before using an account, you need to open it.  
-To open an account, you must have sent some funds to it from another account (see [Send a transaction](#send-a-transaction) to send some funds from an opened account).
+To open an account, you must have sent some funds to it from another account.
 
 Then call the open method:
 
@@ -110,11 +117,11 @@ const wallet = nona.wallet(privateKey);
 await wallet.receiveAll();
 ```
 
-You can also use the websocket to listen and receive transactions in real time:
+You can also listen and receive transactions in real time:
 
 ```typescript
 const wallet = nona.wallet(privateKey);
-// Will create a websocket connection, listen for incoming transactions and automatically receives them.
+// This will create a websocket connection, listen for incoming transactions, and automatically receive them.
 const subscription = await wallet.listenAndReceive({
   // (Optional) next will be called each time a transaction is received
   next: (transactionBlock) => console.log('Received transaction', transactionBlock),
