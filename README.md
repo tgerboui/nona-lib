@@ -960,11 +960,29 @@ try {
 }
 ```
 
-## TODO
+## Roadmap
 
-- [ ] Custom filter on websocket
-- [ ] Work generation
-  - [ ] Local work generation
-  - [ ] Work server
-- [ ] Check integration with nano.to
-- [ ] Tests
+### Websocket
+  
+- [x] Confirmation
+  - [ ] Custom filter
+- [ ] Vote
+- [ ] Start/stop election
+- [ ] Active difficulty
+- [ ] Proof of work
+- [ ] New unconfirmed block
+
+### Proof of work
+
+- [ ] Custom work input
+- [ ] Local work generation
+- [ ] Custom work server URL
+
+### External services
+
+- [ ] Integration with nano.to
+
+### Tests
+
+- [x] Create unit tests
+- [ ] Create integration tests
