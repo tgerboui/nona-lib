@@ -5,6 +5,7 @@ import { ErrorService } from '../../../lib/services/error/error-service';
 import { NonaNetworkError } from '../../../lib/shared/errors/network-error';
 import { NonaError } from '../../../lib/shared/errors/nona-error';
 import { NonaParseError } from '../../../lib/shared/errors/parse-error';
+import { NonaUserError } from '../../../lib/shared/errors/user-error';
 
 describe('ErrorService', () => {
   describe('handleError', () => {
@@ -28,6 +29,11 @@ describe('ErrorService', () => {
       };
       const error = new ZodError([zodIssue]);
       expect(() => ErrorService.handleError(error)).toThrow(NonaParseError);
+    });
+
+    it('should throw NonaUserError when error is an instance of UserError', () => {
+      const error = new NonaUserError('User error');
+      expect(() => ErrorService.handleError(error)).toThrow(NonaUserError);
     });
 
     it('should throw NonaError when error is an instance of Error', () => {
