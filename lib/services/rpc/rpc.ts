@@ -4,7 +4,7 @@ import { NonaRpcError } from '../../shared/errors/rpc-error';
 import { ErrorService } from '../error/error-service';
 
 export class Rpc {
-  instance: AxiosInstance;
+  private instance: AxiosInstance;
 
   constructor({ url }: { url: string }) {
     this.instance = axios.create({
