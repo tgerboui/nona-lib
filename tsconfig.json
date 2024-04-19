@@ -12,5 +12,5 @@
     "strictFunctionTypes": true,
     "outDir": "./dist"
   },
-  "include": ["lib/**/*", "lib/services/rpc"]
+  "include": ["lib/**/*"]
 }
