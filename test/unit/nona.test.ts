@@ -1,9 +1,12 @@
 import { deriveAddress, derivePublicKey, deriveSecretKey } from 'nanocurrency';
 
 import { Nona } from '../../lib/modules/nona';
+import { Rpc } from '../../lib/services/rpc/rpc';
 
 describe('Nona', () => {
   let nona: Nona;
+  const mockRpcCall = jest.fn();
+  const mockRemoteProcedureCall = { call: mockRpcCall };
   const seed = 'cca6fda2102c958239b2e0f02e688414c23939271b7bcfe0d5014ab246071c12';
   const privateKey = deriveSecretKey(seed, 0);
   const publicKey = derivePublicKey(privateKey);
@@ -11,6 +14,11 @@ describe('Nona', () => {
 
   beforeEach(() => {
     nona = new Nona();
+    nona['remoteProcedureCall'] = mockRemoteProcedureCall as unknown as Rpc;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it('should create an instance of Nona', () => {
@@ -43,11 +51,11 @@ describe('Nona', () => {
     const body = { param1: 'value1', param2: 'value2' };
     const response = 'someResponse';
 
-    nona.rpc = jest.fn().mockResolvedValue(response);
+    mockRpcCall.mockResolvedValue(response);
 
     const result = await nona.rpc(action, body);
 
-    expect(nona.rpc).toHaveBeenCalledWith(action, body);
+    expect(mockRpcCall).toHaveBeenCalledWith(action, body);
     expect(result).toBe(response);
   });
 });
