@@ -108,6 +108,10 @@ export class Wallet extends Account {
    * @returns A promise that resolves to an array of hashes of the received blocks.
    */
   public async receiveMultipleTransactions(hashes: string[]): Promise<string[]> {
+    if (hashes.length === 0) {
+      return [];
+    }
+
     const info = await this.info({
       representative: true,
       raw: true,
@@ -164,14 +168,17 @@ export class Wallet extends Account {
    * @returns A promise that resolves to the hash of the sent block.
    */
   public async send(address: string, amount: number | string): Promise<string> {
+    // Convert nano amout to raw amount
+    const rawAmount = UnitService.nanoToRaw(amount);
+    if (rawAmount.isLessThanOrEqualTo(0) || rawAmount.isNaN()) {
+      throw new NonaUserError('Invalid amount');
+    }
+
     const info = await this.info({
       representative: true,
       raw: true,
     });
     const balance = new NonaBigNumber(info.balance);
-    // Convert nano amout to raw amount
-    const rawAmount = UnitService.nanoToRaw(amount);
-
     if (balance.isLessThan(rawAmount)) {
       throw new NonaUserError('Insufficient balance');
     }
