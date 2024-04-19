@@ -4,7 +4,7 @@ import { KeyService } from '../../../lib/services/hash/key-service';
 jest.mock('../../../lib/services/hash/key-service');
 
 describe('Key', () => {
-  const keyService = KeyService as jest.Mocked<typeof KeyService>;
+  const keyServiceMock = KeyService as jest.Mocked<typeof KeyService>;
   let key: jest.Mocked<Key>;
 
   beforeEach(() => {
@@ -18,14 +18,14 @@ describe('Key', () => {
       const publicKey = 'publicKey';
       const address = 'address';
 
-      keyService.getSecretKey.mockReturnValue(privateKey);
-      keyService.getPublicKey.mockReturnValue(publicKey);
-      keyService.getAddress.mockReturnValue(address);
+      keyServiceMock.getSecretKey.mockReturnValue(privateKey);
+      keyServiceMock.getPublicKey.mockReturnValue(publicKey);
+      keyServiceMock.getAddress.mockReturnValue(address);
 
       const result = await key.create(seed);
-      expect(keyService.getSecretKey).toHaveBeenCalledWith(seed, 0);
-      expect(keyService.getPublicKey).toHaveBeenCalledWith(privateKey);
-      expect(keyService.getAddress).toHaveBeenCalledWith(publicKey);
+      expect(keyServiceMock.getSecretKey).toHaveBeenCalledWith(seed, 0);
+      expect(keyServiceMock.getPublicKey).toHaveBeenCalledWith(privateKey);
+      expect(keyServiceMock.getAddress).toHaveBeenCalledWith(publicKey);
       expect(result).toEqual({ privateKey, publicKey, address });
     });
 
@@ -35,16 +35,16 @@ describe('Key', () => {
       const publicKey = 'publicKey';
       const address = 'address';
 
-      keyService.generateSeed.mockResolvedValue(generatedSeed);
-      keyService.getSecretKey.mockReturnValue(privateKey);
-      keyService.getPublicKey.mockReturnValue(publicKey);
-      keyService.getAddress.mockReturnValue(address);
+      keyServiceMock.generateSeed.mockResolvedValue(generatedSeed);
+      keyServiceMock.getSecretKey.mockReturnValue(privateKey);
+      keyServiceMock.getPublicKey.mockReturnValue(publicKey);
+      keyServiceMock.getAddress.mockReturnValue(address);
 
       const result = await key.create();
-      expect(keyService.generateSeed).toHaveBeenCalled();
-      expect(keyService.getSecretKey).toHaveBeenCalledWith(generatedSeed, 0);
-      expect(keyService.getPublicKey).toHaveBeenCalledWith(privateKey);
-      expect(keyService.getAddress).toHaveBeenCalledWith(publicKey);
+      expect(keyServiceMock.generateSeed).toHaveBeenCalled();
+      expect(keyServiceMock.getSecretKey).toHaveBeenCalledWith(generatedSeed, 0);
+      expect(keyServiceMock.getPublicKey).toHaveBeenCalledWith(privateKey);
+      expect(keyServiceMock.getAddress).toHaveBeenCalledWith(publicKey);
       expect(result).toEqual({ privateKey, publicKey, address });
     });
   });
@@ -55,12 +55,12 @@ describe('Key', () => {
       const publicKey = 'publicKey';
       const address = 'address';
 
-      keyService.getPublicKey.mockReturnValue(publicKey);
-      keyService.getAddress.mockReturnValue(address);
+      keyServiceMock.getPublicKey.mockReturnValue(publicKey);
+      keyServiceMock.getAddress.mockReturnValue(address);
 
       const result = key.expand(privateKey);
-      expect(keyService.getPublicKey).toHaveBeenCalledWith(privateKey);
-      expect(keyService.getAddress).toHaveBeenCalledWith(publicKey);
+      expect(keyServiceMock.getPublicKey).toHaveBeenCalledWith(privateKey);
+      expect(keyServiceMock.getAddress).toHaveBeenCalledWith(publicKey);
       expect(result).toEqual({ publicKey, address });
     });
   });
