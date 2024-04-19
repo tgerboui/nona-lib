@@ -700,7 +700,7 @@ const blocks = nona.blocks;
 ### Count
 
 ```typescript
-count(): Promise<number>
+count(): Promise<BlockCount>
 ```
 
 Reports the number of blocks in the ledger and unchecked synchronizing blocks.  
