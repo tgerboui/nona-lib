@@ -1,10 +1,13 @@
+import { deriveAddress, derivePublicKey, deriveSecretKey } from 'nanocurrency';
+
 import { Nona } from '../../lib/modules/nona';
 
 describe('Nona', () => {
   let nona: Nona;
-  const privateKey = '822D087562485A63C119E0232C65906C2D789BAB23CAB28ADEFC9202428C3551';
-  const publicKey = 'EFAD2349492DA76FEF035FE58D9501142759DA34805EDADCCC8A1B2BA7912067';
-  const address = 'nano_3uxf6f6nkdf9fzqi8qz7jpci4739d9f5b14yudges4iu7gms4a59y46mmegz';
+  const seed = 'cca6fda2102c958239b2e0f02e688414c23939271b7bcfe0d5014ab246071c12';
+  const privateKey = deriveSecretKey(seed, 0);
+  const publicKey = derivePublicKey(privateKey);
+  const address = deriveAddress(publicKey, { useNanoPrefix: true });
 
   beforeEach(() => {
     nona = new Nona();
