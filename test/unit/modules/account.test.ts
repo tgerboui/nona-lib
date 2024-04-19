@@ -8,7 +8,7 @@ import { Rpc } from '../../../lib/services/rpc/rpc';
 jest.mock('../../../lib/services/rpc/rpc');
 jest.mock('../../../lib/modules/websocket/websocket');
 
-describe('Account class', () => {
+describe('Account', () => {
   let account: Account;
   let rpcMock: jest.Mocked<Rpc>;
   let websocketMock: jest.Mocked<NonaWebSocket>;

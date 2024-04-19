@@ -3,7 +3,7 @@ import { KeyService } from '../../../lib/services/hash/key-service';
 
 jest.mock('../../../lib/services/hash/key-service');
 
-describe('Key class', () => {
+describe('Key', () => {
   const keyService = KeyService as jest.Mocked<typeof KeyService>;
   let key: jest.Mocked<Key>;
 
