@@ -928,7 +928,7 @@ if you prefer to call RPC directly you can use `nona.rpc`.
 rpc(action: string, body?: object): Promise<unknown>
 ```
 
-Call `account_info` RPC command.
+Call `account_info` RPC command:
 
 ```typescript
 const info = await nona.rpc('account_info', {
@@ -963,10 +963,6 @@ try {
 ## TODO
 
 - [ ] Custom filter on websocket
-- [ ] Handle errors
-  - [ ] Handle connection errors
-  - [ ] Handle format errors
-  - [ ] Handle response errors from the node
 - [ ] Work generation
   - [ ] Local work generation
   - [ ] Work server
