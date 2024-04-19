@@ -16,7 +16,9 @@ export class Nona {
   public node: Node;
 
   constructor({
+    /** URL of the node */
     url = 'http://localhost:7076',
+    /** URL of the WebSocket */
     websocketUrl = 'ws://localhost:7078',
   }: NonaParams = {}) {
     this.remoteProcedureCall = new Rpc({ url });
