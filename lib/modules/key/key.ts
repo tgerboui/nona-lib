@@ -1,8 +1,7 @@
 import { KeyService } from '../../services/hash/key-service';
-import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
 import { AccountKeys, ExpandedKeys } from './key-interface';
 
-export class Key extends RpcConsummer {
+export class Key {
   /**
    * Create keys for an account
    *

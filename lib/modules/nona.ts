@@ -24,8 +24,8 @@ export class Nona {
     this.remoteProcedureCall = new Rpc({ url });
     this.ws = new NonaWebSocket({ url: websocketUrl });
     this.blocks = new Blocks(this.remoteProcedureCall);
-    this.key = new Key(this.remoteProcedureCall);
     this.node = new Node(this.remoteProcedureCall);
+    this.key = new Key();
   }
 
   public account(address: string): Account {
