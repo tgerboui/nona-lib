@@ -1,5 +1,10 @@
 # Nona Lib
 
+[![test](https://github.com/tgerboui/nona-lib/workflows/Test/badge.svg)](https://github.com/tgerboui/nona-lib/actions/workflows/test.yml)
+![Codecov](https://img.shields.io/codecov/c/github/tgerboui/nona-lib)
+![GitHub License](https://img.shields.io/github/license/tgerboui/nona-lib)
+
+
 Nona Lib is a powerful and user-friendly TypeScript library designed to simplify interactions with the Nano cryptocurrency network.  
 
 Whether you're developing wallet software, integrating Nano payments into your application, or just exploring the possibilities of Nano's block lattice structure, Nona Lib provides a comprehensive set of tools to manage accounts, perform transactions, and query blockchain data efficiently and securely through your Nano node.
