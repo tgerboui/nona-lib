@@ -1,16 +1,7 @@
-import {
-  filter,
-  finalize,
-  map,
-  Observable,
-  Subscription,
-} from 'rxjs';
+import { filter, finalize, map, Observable, Subscription } from 'rxjs';
 
 import { WebSocketManager } from '../manager/websocket-manager';
-import {
-  messageFilter,
-  messageMapper,
-} from './websocket-confirmation-helper';
+import { WebSocketConfirmationHelper } from './websocket-confirmation-helper';
 import {
   ConfirmationBlock,
   ConfirmationFilter,
@@ -18,14 +9,17 @@ import {
   WebSocketUpdateConfirmationParams,
 } from './websocket-confirmation-interface';
 
-// TODO: Really need tests here
+// TODO: Need to refactor this file
 export class WebSocketConfirmation {
   private accountListened = new Map<string, number>();
   private observable: Observable<unknown>;
   private subscriptionCount = 0;
   private subscriptionToAll = 0;
 
-  constructor(private webSocketManager: WebSocketManager) {
+  constructor(
+    private webSocketManager: WebSocketManager,
+    private helper = new WebSocketConfirmationHelper(),
+  ) {
     this.observable = this.webSocketManager.subjectTopic('confirmation');
   }
 
@@ -36,8 +30,8 @@ export class WebSocketConfirmation {
     this.addSubscription(accountToListen);
     return this.observable
       .pipe(
-        map<unknown, ConfirmationBlock>((message) => messageMapper(message)),
-        filter<ConfirmationBlock>((message) => messageFilter(message, params.filter)),
+        map<unknown, ConfirmationBlock>((message) => this.helper.messageMapper(message)),
+        filter<ConfirmationBlock>((message) => this.helper.messageFilter(message, params.filter)),
         finalize(() => this.removeSubscription(accountToListen)),
       )
       .subscribe({
@@ -95,7 +89,7 @@ export class WebSocketConfirmation {
   private removeSubscription(accounts?: string[]): void {
     if (accounts) {
       const accountsRemoved = this.removeAccountsFromListened(accounts);
-      if (this.subscriptionToAll === 0) {
+      if (this.subscriptionToAll === 0 && this.subscriptionCount > 1) {
         this.updateWebSocket({ accountsDel: accountsRemoved });
       }
     } else {

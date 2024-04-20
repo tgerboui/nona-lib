@@ -1,10 +1,13 @@
-import {
-  messageFilter,
-  messageMapper,
-} from '../../../../../lib/modules/websocket/confirmation/websocket-confirmation-helper';
+import { WebSocketConfirmationHelper } from '../../../../../lib/modules/websocket/confirmation/websocket-confirmation-helper';
 import { NonaParseError } from '../../../../../lib/shared/errors/parse-error';
 
 describe('WebSocket Confirmation Functions', () => {
+  let websocketConfirmationHelper: WebSocketConfirmationHelper;
+
+  beforeEach(() => {
+    websocketConfirmationHelper = new WebSocketConfirmationHelper();
+  });
+
   describe('messageMapper', () => {
     it('should map a confirmation message to a ConfirmationBlock', () => {
       const mockMessage = {
@@ -26,7 +29,7 @@ describe('WebSocket Confirmation Functions', () => {
         },
       };
 
-      const result = messageMapper(mockMessage);
+      const result = websocketConfirmationHelper.messageMapper(mockMessage);
 
       expect(result).toEqual({
         from: 'fromAccount',
@@ -44,7 +47,7 @@ describe('WebSocket Confirmation Functions', () => {
     it('should handle parsing errors and log them', () => {
       try {
         const badMessage = { badData: 'invalid' };
-        messageMapper(badMessage);
+        websocketConfirmationHelper.messageMapper(badMessage);
         // If the function does not throw an error, the test should fail
         expect(true).toBe(false);
       } catch (error) {
@@ -67,37 +70,39 @@ describe('WebSocket Confirmation Functions', () => {
     };
 
     it('should return true when no filter is applied', () => {
-      expect(messageFilter(mockConfirmationBlock)).toBe(true);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock);
+      expect(result).toBe(true);
     });
 
     it('should return true when an empty filter is applied', () => {
-      expect(messageFilter(mockConfirmationBlock, {})).toBe(true);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, {});
+      expect(result).toBe(true);
     });
 
     it('should filter messages based on the from account', () => {
       const filter = { from: ['fromAccount'] };
-      const result = messageFilter(mockConfirmationBlock, filter);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
     });
 
     it('should filter messages based on the to account', () => {
       const filter = { to: ['toAccount'] };
-      const result = messageFilter(mockConfirmationBlock, filter);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
     });
 
     it('should filter messages based on the subtype', () => {
       const filter = { subtype: ['send'] };
-      const result = messageFilter(mockConfirmationBlock, filter);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
     });
 
     it('should filter messages based on the from and to accounts', () => {
       const filter = { accounts: ['fromAccount', 'toAccount'] };
-      const result = messageFilter(mockConfirmationBlock, filter);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
     });
@@ -109,7 +114,7 @@ describe('WebSocket Confirmation Functions', () => {
         to: ['toAccount'],
         subtype: ['send', 'receive'],
       };
-      const result = messageFilter(mockConfirmationBlock, filter);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
     });
@@ -121,7 +126,7 @@ describe('WebSocket Confirmation Functions', () => {
         to: ['wrongTo'],
         subtype: ['open'],
       };
-      const result = messageFilter(mockConfirmationBlock, filter);
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(false);
     });
