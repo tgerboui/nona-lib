@@ -22,7 +22,8 @@ Whether you're developing wallet software, integrating Nano payments into your a
 - [Basic Usage](#basic-usage)
 - [Nona API](#nona-api)
 - [Handling Errors](#handling-errors)
-
+- [Disclaimer](#disclaimer)
+- [Roadmap](#roadmap)
 
 ## Installation
 
@@ -964,6 +965,21 @@ try {
   }
 }
 ```
+
+## Disclaimer
+
+Nona Lib is a young and evolving TypeScript library designed to interact with the Nano cryptocurrency network. While we strive to ensure reliability and robustness, the following points need to be considered:
+
+- **Early-stage Software**: As an early-stage library, Nona Lib may undergo significant changes with updates that could improve or alter functionalities drastically. Users are advised to keep this in mind when using the library in production environments.
+
+- **Limited Usage**: Given its nascent stage, the library has been subjected to limited usage. This means there could be undiscovered bugs or issues affecting its performance and reliability. We welcome contributions and reports on any anomalies found during usage.
+
+- **Dependency on External Systems**: Nona Lib operates in conjunction with external systems such as Nano nodes, and its performance is highly dependent on the configuration and stability of these systems.
+
+- **Security Risks**: As with any tool managing financial transactions, there is an inherent risk. Users should be cautious and test thoroughly when integrating and deploying Nona Lib in security-sensitive environments.
+
+We encourage the community to contribute to the development and testing of Nona Lib to help us improve its functionality and security. Use this library with caution, and ensure you have robust backup and recovery processes in place.
+
 
 ## Roadmap
 
