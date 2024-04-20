@@ -1,5 +1,5 @@
-import { filter, map, Observable } from 'rxjs';
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { filter, map, Observable } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import WebSocket from 'ws';
 
@@ -21,7 +21,7 @@ export class WebSocketManager {
     });
   }
 
-  public multiplexSubscribe({ topic, options }: WebsocketSubscriptionOptions) {
+  public multiplexSubscribe({ topic, options }: WebsocketSubscriptionOptions): Observable<unknown> {
     return this.wsSubject
       .multiplex(
         () => {
@@ -42,11 +42,11 @@ export class WebSocketManager {
     );
   }
 
-  public next({ action, topic, options }: WebSocketManagerNext) {
+  public next({ action, topic, options }: WebSocketManagerNext): void {
     this.wsSubject.next({ action, topic, options } as any);
   }
 
-  public subscribeTopic({ topic, options }: WebsocketSubscriptionOptions) {
+  public subscribeTopic({ topic, options }: WebsocketSubscriptionOptions): void {
     this.next({
       action: 'subscribe',
       topic,
@@ -54,7 +54,7 @@ export class WebSocketManager {
     });
   }
 
-  public updateTopic({ topic, options }: WebsocketSubscriptionOptions) {
+  public updateTopic({ topic, options }: WebsocketSubscriptionOptions): void {
     this.next({
       action: 'update',
       topic,
@@ -62,14 +62,14 @@ export class WebSocketManager {
     });
   }
 
-  public unsubscribeTopic(topic: WebsocketTopic) {
+  public unsubscribeTopic(topic: WebsocketTopic): void {
     this.next({
       action: 'unsubscribe',
       topic,
     });
   }
 
-  public complete() {
+  public complete(): void {
     this.wsSubject.complete();
   }
 }
