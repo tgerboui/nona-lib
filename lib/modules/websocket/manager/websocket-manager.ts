@@ -1,15 +1,15 @@
+import { filter, map, Observable } from 'rxjs';
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
-import { map, filter, Observable } from 'rxjs';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import WebSocket from 'ws';
 
+import { WebsocketParams } from '../websocket-interface';
 import {
   WebSocketManagerMessage,
   WebSocketManagerNext,
   WebsocketSubscriptionOptions,
   WebsocketTopic,
 } from './websocket-manager-interface';
-import { WebsocketParams } from '../websocket-interface';
 
 export class WebSocketManager {
   private wsSubject: WebSocketSubject<WebSocketManagerMessage>;
