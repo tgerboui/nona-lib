@@ -1,7 +1,7 @@
 {
-  "name": "nona",
+  "name": "nona-lib",
   "version": "1.0.0",
-  "description": "",
+  "description": "TypeScript library to simplify interactions with the Nano currency node.",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -9,9 +9,19 @@
     "test": "jest",
     "coverage": "jest --coverage"
   },
-  "keywords": [],
-  "author": "",
-  "license": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tgerboui/nona-lib.git"
+  },
+  "keywords": [
+    "nano",
+    "cryptocurrency",
+    "typescript",
+    "node",
+    "library"
+  ],
+  "author": "Thomas Gerbouin",
+  "license": "MIT",
   "type": "module",
   "devDependencies": {
     "@babel/core": "^7.24.4",
@@ -20,6 +30,7 @@
     "@eslint/js": "^9.1.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.30",
+    "@types/ws": "^8.5.10",
     "babel-jest": "^29.7.0",
     "eslint": "^9.1.0",
     "eslint-plugin-max-params-no-constructor": "^0.0.4",
@@ -28,7 +39,6 @@
     "typescript-eslint": "^7.7.0"
   },
   "dependencies": {
-    "@types/ws": "^8.5.10",
     "axios": "^1.6.8",
     "bignumber.js": "^9.1.2",
     "nanocurrency": "^2.5.0",
