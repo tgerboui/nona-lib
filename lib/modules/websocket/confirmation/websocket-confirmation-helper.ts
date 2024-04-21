@@ -9,17 +9,25 @@ export class WebSocketConfirmationHelper {
       const confirmation = WebSocketConfirmationMessage.parse(message);
       const { amount, account, block, hash, confirmation_type } = confirmation;
 
-      return {
-        from: account,
-        to: block.link_as_account,
+      const confirmationBlock: ConfirmationBlock = {
+        account,
         amount: UnitService.rawToNanoString(amount),
-        subtype: block.subtype,
-        hash: hash,
-        previous: block.previous,
-        work: block.work,
-        link: block.link,
+        hash,
         confirmationType: confirmation_type,
+        block: {
+          account: block.account,
+          previous: block.previous,
+          representative: block.representative,
+          balance: UnitService.rawToNanoString(block.balance),
+          link: block.link,
+          linkAsAccount: block.link_as_account,
+          signature: block.signature,
+          work: block.work,
+          subtype: block.subtype,
+        },
       };
+
+      return confirmationBlock;
     } catch (error) {
       ErrorService.handleError(error);
     }
@@ -31,16 +39,18 @@ export class WebSocketConfirmationHelper {
     const { accounts, subtype, from, to } = filter;
     const conditions: boolean[] = [];
     if (accounts) {
-      conditions.push(accounts.includes(message.from) || accounts.includes(message.to));
+      conditions.push(
+        accounts.includes(message.account) || accounts.includes(message.block.account),
+      );
     }
     if (from) {
-      conditions.push(from.includes(message.from));
+      conditions.push(from.includes(message.account));
     }
-    if (to) {
-      conditions.push(to.includes(message.to));
+    if (to && message.block.subtype === 'send') {
+      conditions.push(to.includes(message.block.linkAsAccount));
     }
     if (subtype) {
-      conditions.push(subtype.includes(message.subtype));
+      conditions.push(subtype.includes(message.block.subtype));
     }
 
     return conditions.every((condition) => condition);

@@ -11,16 +11,16 @@ describe('WebSocket Confirmation Functions', () => {
   describe('messageMapper', () => {
     it('should map a confirmation message to a ConfirmationBlock', () => {
       const mockMessage = {
-        account: 'fromAccount',
+        account: 'rootAccount',
         amount: '1000000000000000000000000000000', // 1 nano in raw unit
         hash: 'hashValue',
         confirmation_type: 'confirmation_type',
         block: {
           type: 'typeValue',
-          account: 'toAccount',
+          account: 'blockAccount',
           previous: 'previousHash',
           representative: 'representativeValue',
-          balance: 'balanceValue',
+          balance: '2000000000000000000000000000000',
           link: 'linkValue',
           link_as_account: 'toAccount',
           signature: 'signatureValue',
@@ -32,15 +32,21 @@ describe('WebSocket Confirmation Functions', () => {
       const result = websocketConfirmationHelper.messageMapper(mockMessage);
 
       expect(result).toEqual({
-        from: 'fromAccount',
-        to: 'toAccount',
-        amount: '1', // Converted in nano
-        subtype: 'send',
+        account: 'rootAccount',
+        amount: '1',
         hash: 'hashValue',
-        previous: 'previousHash',
-        work: 'workValue',
-        link: 'linkValue',
         confirmationType: 'confirmation_type',
+        block: {
+          account: 'blockAccount',
+          previous: 'previousHash',
+          representative: 'representativeValue',
+          balance: '2',
+          link: 'linkValue',
+          linkAsAccount: 'toAccount',
+          signature: 'signatureValue',
+          work: 'workValue',
+          subtype: 'send',
+        },
       });
     });
 
@@ -58,15 +64,21 @@ describe('WebSocket Confirmation Functions', () => {
 
   describe('messageFilter', () => {
     const mockConfirmationBlock = {
-      from: 'fromAccount',
-      to: 'toAccount',
+      account: 'rootAccount',
       amount: '1',
-      subtype: 'send',
       hash: 'hashValue',
-      previous: 'previousHash',
-      work: 'workValue',
-      link: 'linkValue',
-      confirmationType: 'active',
+      confirmationType: 'confirmation_type',
+      block: {
+        account: 'blockAccount',
+        previous: 'previousHash',
+        representative: 'representativeValue',
+        balance: '2',
+        link: 'linkValue',
+        linkAsAccount: 'toAccount',
+        signature: 'signatureValue',
+        work: 'workValue',
+        subtype: 'send',
+      },
     };
 
     it('should return true when no filter is applied', () => {
@@ -80,7 +92,7 @@ describe('WebSocket Confirmation Functions', () => {
     });
 
     it('should filter messages based on the from account', () => {
-      const filter = { from: ['fromAccount'] };
+      const filter = { from: ['rootAccount'] };
       const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
@@ -101,7 +113,7 @@ describe('WebSocket Confirmation Functions', () => {
     });
 
     it('should filter messages based on the from and to accounts', () => {
-      const filter = { accounts: ['fromAccount', 'toAccount'] };
+      const filter = { accounts: ['rootAccount', 'blockAccount'] };
       const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
@@ -109,10 +121,10 @@ describe('WebSocket Confirmation Functions', () => {
 
     it('should filter messages based on a complex filter', () => {
       const filter = {
-        accounts: ['fromAccount', 'anotherAccount'],
-        from: ['fromAccount'],
+        accounts: ['rootAccount', 'toAccount'],
+        from: ['rootAccount'],
         to: ['toAccount'],
-        subtype: ['send', 'receive'],
+        subtype: ['send'],
       };
       const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 

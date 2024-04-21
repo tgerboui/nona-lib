@@ -1,4 +1,3 @@
-// TODO: Document each field
 export interface WebSocketConfirmationParams {
   /**
    * A function that will be called each time a transaction is received.
@@ -29,23 +28,34 @@ export interface WebSocketUpdateConfirmationParams {
  * Represents a confirmation block in a WebSocket communication.
  */
 export interface ConfirmationBlock {
-  /** Account address that sent the transaction. */
-  from: string;
-  /** Account address receiving the transaction.  */
-  to: string;
-  /** Amount transferred in the transaction, represented as a raw string. */
+  /** Account address involved in the transaction. */
+  account: string;
+  /** Amount transferred in the transaction, in nano unit. */
   amount: string;
-  /** Subtype of the block, which indicates the kind of transaction (e.g., send, receive). */
-  subtype: string;
   /** Unique hash of the block. This serves as an identifier for the block on the network. */
   hash: string;
-  /** Hash of the previous block in the account's chain, linking this block to its predecessor. */
-  previous: string;
-  /** Work field represents the Proof of Work for the block. */
-  work: string;
-  /** In a send block, represents the destination account or pending block being received. In a receive block, it represents the source block. */
-  link: string;
+  /** Method or type of confirmation for the transaction */
   confirmationType: string;
+  block: {
+    /** The account address that owns this block. */
+    account: string;
+    /** Hash of the previous block in the account's chain, linking this block to its predecessor. 0 if open block. */
+    previous: string;
+    /** Representative of the account. */
+    representative: string;
+    /** Resulting balance of the account in nano unit. */
+    balance: string;
+    /** In a send block, public key of the destination account; in a receive block, the hash of the send block being received; in a change block, 0. */
+    link: string;
+    /** In a send block, account address of the link field. */
+    linkAsAccount: string;
+    /** Digital signature of the block. */
+    signature: string;
+    /** Work field represents the Proof of Work for the block. */
+    work: string;
+    /** Subtype of the block, which indicates the kind of transaction (e.g., send, receive). */
+    subtype: string;
+  };
 }
 
 export interface ConfirmationFilter {
