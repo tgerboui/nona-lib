@@ -203,7 +203,7 @@ export class Wallet extends Account {
    * @returns A Subscription object that can be used to unsubscribe from the listener.
    */
   public listenAndReceive(params: WalletListAndReceiveParams = {}): Subscription {
-    const nextHandler = async (block: ConfirmationBlock) => {
+    const nextHandler = async (block: ConfirmationBlock): Promise<void> => {
       try {
         await this.receive(block.hash);
         // Send the message to the next callback once the transaction is received
@@ -219,8 +219,8 @@ export class Wallet extends Account {
 
     return this.listenConfirmation({
       next: nextHandler,
-      error: params?.error,
-      complete: params?.complete,
+      error: params.error,
+      complete: params.complete,
       // Only listen to send transactions to this account
       filter: {
         to: [this.address],

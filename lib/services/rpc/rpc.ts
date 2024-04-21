@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 import { NonaRpcError } from '../../shared/errors/rpc-error';
 import { ErrorService } from '../error/error-service';
+import { RpcPostResponse } from './rpc-interface';
 
 export class Rpc {
   private instance: AxiosInstance;
@@ -20,16 +21,16 @@ export class Rpc {
    */
   public async call(action: string, body?: object): Promise<unknown> {
     try {
-      const res = await this.instance.post('/', {
+      const { data } = await this.instance.post<RpcPostResponse>('/', {
         action,
         ...body,
       });
 
-      if (res.data.error) {
-        this.handleResponseDataError(res.data.error);
+      if (data.error) {
+        this.handleResponseDataError(data.error);
       }
 
-      return res.data;
+      return data as unknown;
     } catch (error) {
       ErrorService.handleError(error);
     }

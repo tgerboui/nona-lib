@@ -23,7 +23,7 @@ export class WebSocketConfirmation {
     this.observable = this.webSocketManager.subjectTopic('confirmation');
   }
 
-  subscribe(params: WebSocketConfirmationParams): Subscription {
+  public subscribe(params: WebSocketConfirmationParams): Subscription {
     const { next, error, complete } = params;
 
     const accountToListen = this.getAccountsToListen(params.filter);
@@ -32,7 +32,9 @@ export class WebSocketConfirmation {
       .pipe(
         map<unknown, ConfirmationBlock>((message) => this.helper.messageMapper(message)),
         filter<ConfirmationBlock>((message) => this.helper.messageFilter(message, params.filter)),
-        finalize(() => this.removeSubscription(accountToListen)),
+        finalize(() => {
+          this.removeSubscription(accountToListen);
+        }),
       )
       .subscribe({
         next,
@@ -150,7 +152,7 @@ export class WebSocketConfirmation {
     });
   }
 
-  private updateWebSocket({ accountsAdd, accountsDel }: WebSocketUpdateConfirmationParams) {
+  private updateWebSocket({ accountsAdd, accountsDel }: WebSocketUpdateConfirmationParams): void {
     this.webSocketManager.updateTopic({
       topic: 'confirmation',
       options: {

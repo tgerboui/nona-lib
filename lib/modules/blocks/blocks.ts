@@ -7,7 +7,7 @@ export class Blocks extends RpcConsummer {
    * Reports the number of blocks in the ledger and unchecked synchronizing blocks
    * @returns A promise that resolves to the count, unchecked and cemtented blocks
    */
-  async count(): Promise<BlockCount> {
+  public async count(): Promise<BlockCount> {
     const count = await this.rpc.call('block_count');
 
     return BlockCount.parse(count);

@@ -29,10 +29,8 @@ export interface ReceivableParamsUnsorted extends ReceivableParams {
  * These can be used to fetch more detailed information about each block.
  */
 export type ReceivableHasheBlocks = string[];
-export type ReceivableValueBlocks = {
-  /** Key: hash of the block, value: amount */
-  [key: string]: string;
-};
+/** Key: hash of the block, value: amount */
+export type ReceivableValueBlocks = Record<string, string>;
 /**
  * Represents a list of receivable block identifiers as strings.
  * These can be used to fetch more detailed information about each block.

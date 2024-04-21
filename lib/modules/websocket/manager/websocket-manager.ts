@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { filter, map, Observable } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import WebSocket from 'ws';
@@ -17,6 +16,7 @@ export class WebSocketManager {
   constructor({ url }: WebsocketParams) {
     this.wsSubject = webSocket({
       url,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
       WebSocketCtor: WebSocket as any,
     });
   }
@@ -43,6 +43,7 @@ export class WebSocketManager {
   }
 
   public next({ action, topic, options }: WebSocketManagerNext): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     this.wsSubject.next({ action, topic, options } as any);
   }
 

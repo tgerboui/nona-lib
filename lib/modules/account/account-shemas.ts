@@ -71,7 +71,7 @@ export const AccountHistoryBlock = z.object({
   /** Account address of the block. */
   account: z.string(),
   /** Amount of the block in nano unit */
-  amount: z.string().transform(UnitService.rawToNanoString),
+  amount: z.string().transform((amount) => UnitService.rawToNanoString(amount)),
   /** Type of block. */
   type: z.string(),
   /** Hash of the block. */
