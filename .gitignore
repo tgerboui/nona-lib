@@ -6,3 +6,6 @@ index.ts
 
 # Jest coverage report
 coverage/
+
+# Vscode settings
+.vscode/
