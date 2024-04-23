@@ -2,7 +2,7 @@ node_modules/
 dist/
 
 # Index to test the library, never commit this file
-index.ts
+/index.ts
 
 # Jest coverage report
 coverage/

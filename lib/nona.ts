@@ -1,11 +1,11 @@
-import { Rpc } from '../services/rpc/rpc';
-import { Account } from './account/account';
-import { Blocks } from './blocks/blocks';
-import { Key } from './key/key';
-import { Node } from './node/node';
-import { NonaParams } from './nona/nona-interface';
-import { Wallet } from './wallet/wallet';
-import { NonaWebSocket } from './websocket/websocket';
+import { Rpc } from './services/rpc/rpc';
+import { Account } from './modules/account/account';
+import { Blocks } from './modules/blocks/blocks';
+import { Key } from './modules/key/key';
+import { Node } from './modules/node/node';
+import { NonaParams } from './modules/nona/nona-interface';
+import { Wallet } from './modules/wallet/wallet';
+import { NonaWebSocket } from './modules/websocket/websocket';
 
 export class Nona {
   private remoteProcedureCall: Rpc;
