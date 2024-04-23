@@ -487,8 +487,8 @@ Listen all sent confirmation blocks for the account from a specific address:
 const subscription = await account.listenConfirmation({
   next: (transactionBlock) => console.log('Received confirmation', transactionBlock),
   filter: {
-    subtype: ['send'],
-    from: ['nano_1send...'],
+    accounts: ['nano_1send...'],
+    subtype: ['send']
   },
 });
 ```
