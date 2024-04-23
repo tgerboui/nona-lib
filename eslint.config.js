@@ -14,6 +14,7 @@ export default tseslint.config(
       'babel.config.cjs',
       'index.ts',
       'eslint.config.js',
+      'tsup.config.ts',
     ],
   },
   eslint.configs.recommended,
