@@ -2,8 +2,8 @@
   "name": "nona-lib",
   "version": "1.0.0",
   "description": "TypeScript library to simplify interactions with the Nano currency node.",
-  "main": "dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/nona.js",
+  "types": "./dist/nona.d.ts",
   "files": [
     "dist"
   ],
