@@ -1,6 +1,6 @@
 import { deriveAddress, derivePublicKey, deriveSecretKey } from 'nanocurrency';
 
-import { Nona } from '../../lib/modules/nona';
+import { Nona } from '../../lib/nona';
 import { Rpc } from '../../lib/services/rpc/rpc';
 
 describe('Nona', () => {

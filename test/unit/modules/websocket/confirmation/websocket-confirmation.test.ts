@@ -107,11 +107,10 @@ describe('WebSocketConfirmation', () => {
     it('should return a list of unique accounts to listen from the filter', () => {
       const filter = {
         accounts: ['account1', 'account2', 'account1'],
-        from: ['account2', 'account1', 'account3'],
         to: ['account4', 'account2'],
       };
       const accountsToListen = webSocketConfirmation['getAccountsToListen'](filter);
-      expect(accountsToListen).toEqual(['account1', 'account2', 'account3', 'account4']);
+      expect(accountsToListen).toEqual(['account1', 'account2', 'account4']);
     });
 
     it('should return undefined when no filters are applied', () => {
