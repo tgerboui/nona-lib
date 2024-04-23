@@ -45,15 +45,12 @@ export class WebSocketConfirmation {
 
   private getAccountsToListen(confirmationFilter?: ConfirmationFilter): string[] | undefined {
     if (!confirmationFilter) return undefined;
-    const { accounts, from, to } = confirmationFilter;
+    const { accounts, to } = confirmationFilter;
     const accountsToListen = [];
+
     let filtered = false;
     if (accounts) {
       accountsToListen.push(...accounts);
-      filtered = true;
-    }
-    if (from) {
-      accountsToListen.push(...from);
       filtered = true;
     }
     if (to) {

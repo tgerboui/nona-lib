@@ -36,15 +36,13 @@ export class WebSocketConfirmationHelper {
   public messageFilter(message: ConfirmationBlock, filter?: ConfirmationFilter): boolean {
     if (!filter) return true;
 
-    const { accounts, subtype, from, to } = filter;
+    const { accounts, subtype, to } = filter;
     const conditions: boolean[] = [];
     if (accounts) {
-      conditions.push(
-        accounts.includes(message.account) || accounts.includes(message.block.account),
-      );
-    }
-    if (from) {
-      conditions.push(from.includes(message.account));
+      const inAccount = accounts.includes(message.account);
+      const inLinkAsAccount = accounts.includes(message.block.linkAsAccount);
+
+      conditions.push(inAccount || inLinkAsAccount);
     }
     if (to && message.block.subtype === 'send') {
       conditions.push(to.includes(message.block.linkAsAccount));

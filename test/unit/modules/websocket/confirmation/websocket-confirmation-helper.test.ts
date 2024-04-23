@@ -91,13 +91,6 @@ describe('WebSocket Confirmation Functions', () => {
       expect(result).toBe(true);
     });
 
-    it('should filter messages based on the from account', () => {
-      const filter = { from: ['rootAccount'] };
-      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
-
-      expect(result).toBe(true);
-    });
-
     it('should filter messages based on the to account', () => {
       const filter = { to: ['toAccount'] };
       const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
@@ -112,17 +105,23 @@ describe('WebSocket Confirmation Functions', () => {
       expect(result).toBe(true);
     });
 
-    it('should filter messages based on the from and to accounts', () => {
-      const filter = { accounts: ['rootAccount', 'blockAccount'] };
+    it('should filter messages based on the receive account', () => {
+      const filter = { accounts: ['toAccount'] };
       const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
 
       expect(result).toBe(true);
     });
 
+    it('should filter out account that are not in the to', () => {
+      const filter = { accounts: ['rootAccount'], to: ['rootAccount'] };
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
+
+      expect(result).toBe(false);
+    });
+
     it('should filter messages based on a complex filter', () => {
       const filter = {
         accounts: ['rootAccount', 'toAccount'],
-        from: ['rootAccount'],
         to: ['toAccount'],
         subtype: ['send'],
       };
@@ -131,10 +130,30 @@ describe('WebSocket Confirmation Functions', () => {
       expect(result).toBe(true);
     });
 
+    it('should return false when conditions are not met for account', () => {
+      const filter = { accounts: ['wrongAccount'] };
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when conditions are not met for to', () => {
+      const filter = { to: ['wrongTo'] };
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when conditions are not met for subtype', () => {
+      const filter = { subtype: ['open'] };
+      const result = websocketConfirmationHelper.messageFilter(mockConfirmationBlock, filter);
+
+      expect(result).toBe(false);
+    });
+
     it('should return false when conditions are not met', () => {
       const filter = {
         accounts: ['wrongAccount'],
-        from: ['wrongFrom'],
         to: ['wrongTo'],
         subtype: ['open'],
       };

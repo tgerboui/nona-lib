@@ -63,8 +63,6 @@ export interface ConfirmationFilter {
   accounts?: string[];
   /** List of block subtypes to filter the confirmation blocks. */
   subtype?: string[];
-  /** Account addresses that sent the transaction. */
-  from?: string[];
   /** Account addresses that received the transaction. */
   to?: string[];
 }
