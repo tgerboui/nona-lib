@@ -1001,7 +1001,10 @@ We encourage the community to contribute to the development and testing of Nona 
 
 ### External services
 
-- [ ] Integration with nano.to
+#### Nano.to
+
+- [ ] Integrate [Nano name service](https://github.com/fwd/nano-to) (in progress)
+- [ ] Integrate [rpc.nano.to](https://rpc.nano.to/) commands
 
 ### Tests
 
