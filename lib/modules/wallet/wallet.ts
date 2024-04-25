@@ -37,6 +37,7 @@ export class Wallet extends Account {
   // TODO: Implement optional hash
   /**
    * Opens the account with the provided representative.
+   *
    * @param representative The representative to open the wallet with.
    * @returns A promise that resolves to the hash of the opened block.
    */
@@ -46,6 +47,7 @@ export class Wallet extends Account {
     if (Object.keys(lastHashes).length === 0) {
       throw new NonaUserError('No receivable blocks');
     }
+
     const hash = Object.keys(lastHashes)[0];
     const hashValue = lastHashes[hash];
 
@@ -65,95 +67,47 @@ export class Wallet extends Account {
 
   /**
    * Receives a pending transaction.
+   *
    * @param hash The hash of the transaction to receive. If not provided, a receivable hash will be used.
    * @returns A promise that resolves to the hash of the received block.
    */
-  public async receive(hash?: string): Promise<string> {
-    const info = await this.info({
-      representative: true,
-      raw: true,
-    });
+  public async receive(hash: string): Promise<string>;
+  public async receive(): Promise<string | null>;
+  public async receive(hash?: string): Promise<string | null> {
     let receiveHash = hash;
 
     // If no hash is provided, get a receivable hash
     if (!receiveHash) {
       const receivable = await this.receivable({ count: 1 });
       if (receivable.length === 0) {
-        throw new NonaUserError('No receivable blocks');
+        return null;
       }
       receiveHash = receivable[0];
     }
 
-    // Get hash info
-    const hashInfo = await this.blocks.info(receiveHash);
-    const finalBalance = NonaBigNumber(info.balance).plus(hashInfo.amount);
-
-    // Generate work and format block
-    const block = await this.blocks.create({
-      account: this.address,
-      previous: info.frontier,
-      representative: info.representative,
-      balance: finalBalance.toString(),
-      link: receiveHash,
-      key: this.privateKey,
-    });
-
     // Broadcast to network
-    return this.blocks.process(block, 'receive');
-  }
-
-  /**
-   * Receives multiple pending transactions.
-   * @param hashes An array of hashes of the transactions to receive.
-   * @returns A promise that resolves to an array of hashes of the received blocks.
-   */
-  public async receiveMultipleTransactions(hashes: string[]): Promise<string[]> {
-    if (hashes.length === 0) {
-      return [];
-    }
-
-    const info = await this.info({
-      representative: true,
-      raw: true,
-    });
-    let balance = new NonaBigNumber(info.balance);
-    let previous = info.frontier;
-    const receivedHashes: string[] = [];
-
-    for (const hash of hashes) {
-      const hashInfo = await this.blocks.info(hash);
-      balance = balance.plus(hashInfo.amount);
-
-      const block = await this.blocks.create({
-        account: this.address,
-        previous: previous,
-        representative: info.representative,
-        balance: balance.toString(),
-        link: hash,
-        key: this.privateKey,
-      });
-      const processed = await this.blocks.process(block, 'receive');
-      previous = processed;
-      receivedHashes.push(processed);
-    }
-
-    return receivedHashes;
+    return this.receiveHash(receiveHash);
   }
 
   /**
    * Receives all pending transactions.
+   *
+   * @param hashes An array of hashes of the transactions to receive. If not provided all pending transactions will be received.
    * @returns A promise that resolves to an array of hashes of the received blocks.
    */
-  public async receiveAll(): Promise<string[]> {
-    const receivedHashes: string[] = [];
+  public async receiveAll(hashes?: string[]): Promise<string[]> {
+    if (hashes) {
+      return this.receiveHashes(hashes);
+    }
 
+    const receivedHashes: string[] = [];
     let hasPending = true;
     while (hasPending) {
       const receivable = await this.receivable({ count: 100 });
 
       hasPending = receivable.length > 0;
       if (hasPending) {
-        const received = await this.receiveMultipleTransactions(receivable);
+        const received = await this.receiveHashes(receivable);
         receivedHashes.push(...received);
       }
     }
@@ -163,6 +117,7 @@ export class Wallet extends Account {
 
   /**
    * Sends a transaction to the specified address.
+   *
    * @param address The address to send the transaction to.
    * @param amount The amount to send in nano unit.
    * @returns A promise that resolves to the hash of the sent block.
@@ -199,13 +154,14 @@ export class Wallet extends Account {
 
   /**
    * Listens for incoming transactions and automatically receives them.
+   *
    * @param {{ next, error, complete }} params Callback for the listener.
    * @returns A Subscription object that can be used to unsubscribe from the listener.
    */
   public listenAndReceive(params: WalletListAndReceiveParams = {}): Subscription {
     const nextHandler = async (block: ConfirmationBlock): Promise<void> => {
       try {
-        await this.receive(block.hash);
+        await this.receiveHash(block.hash);
         // Send the message to the next callback once the transaction is received
         if (params.next) {
           params.next(block);
@@ -231,6 +187,7 @@ export class Wallet extends Account {
 
   /**
    * Changes the representative of the account.
+   *
    * @param representative The new representative to set.
    * @returns A promise that resolves to the hash of the changed block.
    */
@@ -249,5 +206,76 @@ export class Wallet extends Account {
     });
 
     return this.blocks.process(block, 'change');
+  }
+
+  /**
+   * @deprecated Use `receiveAll` instead.
+   */
+  public async receiveMultipleTransactions(hashes: string[]): Promise<string[]> {
+    return this.receiveHashes(hashes);
+  }
+
+  /**
+   * Receives a hash.
+   *
+   * @param hash - The hash to be processed.
+   * @returns A promise that resolves to the received block.
+   */
+  private async receiveHash(hash: string): Promise<string> {
+    const { balance, representative, frontier } = await this.info({
+      representative: true,
+      raw: true,
+    });
+
+    const hashInfo = await this.blocks.info(hash);
+    const finalBalance = NonaBigNumber(balance).plus(hashInfo.amount);
+
+    return await this.blocks.receiveBlock({
+      account: this.address,
+      previous: frontier,
+      representative: representative,
+      balance: finalBalance.toString(),
+      link: hash,
+      key: this.privateKey,
+    });
+  }
+
+  /**
+   * Receives multiple pending transactions.
+   *
+   * @param hashes An array of hashes of the transactions to receive.
+   * @returns A promise that resolves to an array of hashes of the received blocks.
+   */
+  private async receiveHashes(hashes: string[]): Promise<string[]> {
+    if (hashes.length === 0) return [];
+
+    const {
+      balance: accountBalance,
+      representative,
+      frontier,
+    } = await this.info({ representative: true, raw: true });
+
+    let balance = new NonaBigNumber(accountBalance);
+    let previous = frontier;
+    const receivedHashes: string[] = [];
+
+    for (const hash of hashes) {
+      const hashInfo = await this.blocks.info(hash);
+      balance = balance.plus(hashInfo.amount);
+
+      const processed = await this.blocks.receiveBlock({
+        account: this.address,
+        previous: previous,
+        representative: representative,
+        balance: balance.toString(),
+        link: hash,
+        key: this.privateKey,
+      });
+
+      previous = processed;
+      receivedHashes.push(processed);
+    }
+
+    return receivedHashes;
   }
 }

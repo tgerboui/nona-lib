@@ -3,6 +3,7 @@ import { CreateBlockParams } from '../../../lib/modules/blocks/blocks-interface'
 import { Block, BlockInfo } from '../../../lib/modules/blocks/blocks-schema';
 import { Rpc } from '../../../lib/services/rpc/rpc';
 
+// TODO: separate all mthods tests in describe blocks
 describe('Blocks', () => {
   let blocks: Blocks;
   const rpcCallMock = jest.fn();
@@ -116,5 +117,20 @@ describe('Blocks', () => {
       hash,
     });
     expect(result).toEqual(BlockInfo.parse(infoResponse));
+  });
+
+  describe('receiveBlock', () => {
+    it('should call create and process process', async () => {
+      const createParams = { param: 'param' };
+      const block = { block: 'block' };
+      const processResponse = { response: 'response' };
+      blocks.create = jest.fn().mockResolvedValue(block);
+      blocks.process = jest.fn().mockResolvedValue(processResponse);
+
+      const result = await blocks.receiveBlock(createParams as unknown as CreateBlockParams);
+      expect(blocks.create).toHaveBeenCalledWith({ param: 'param' });
+      expect(blocks.process).toHaveBeenCalledWith({ block: 'block' }, 'receive');
+      expect(result).toEqual({ response: 'response' });
+    });
   });
 });

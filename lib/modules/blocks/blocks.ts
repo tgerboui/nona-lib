@@ -5,6 +5,7 @@ import { Block, BlockCount, BlockInfo, BlockProcess } from './blocks-schema';
 export class Blocks extends RpcConsummer {
   /**
    * Reports the number of blocks in the ledger and unchecked synchronizing blocks
+   *
    * @returns A promise that resolves to the count, unchecked and cemtented blocks
    */
   public async count(): Promise<BlockCount> {
@@ -15,6 +16,7 @@ export class Blocks extends RpcConsummer {
 
   /**
    * Creates a new block based on input data & signed with private key or account in wallet.
+   *
    * @param params - The options for creating the block.
    * @returns A promise that resolves to the created block.
    */
@@ -30,6 +32,7 @@ export class Blocks extends RpcConsummer {
 
   /**
    * Publish block to the network
+   *
    * @param block - The block to publish
    * @param subtype - The subtype of the block
    * @returns A promise that resolves to the hash of the published block
@@ -46,6 +49,7 @@ export class Blocks extends RpcConsummer {
 
   /**
    * Retrieves information about a specific block.
+   *
    * @param hash The hash of the block to retrieve information for.
    * @returns A promise that resolves to an object containing the block information.
    */
@@ -56,5 +60,17 @@ export class Blocks extends RpcConsummer {
     });
 
     return this.parseHandler(res, BlockInfo);
+  }
+
+  /**
+   * Create and process a receive block.
+   *
+   * @param block - The block to be received.
+   * @returns A promise that resolves to the hash of the published block
+   */
+  public async receiveBlock(block: CreateBlockParams): Promise<string> {
+    const createdBlock = await this.create(block);
+
+    return this.process(createdBlock, 'receive');
   }
 }

@@ -11,7 +11,6 @@ import { NonaUserError } from '../../../lib/shared/errors/user-error';
 jest.mock('../../../lib/services/rpc/rpc');
 jest.mock('../../../lib/modules/blocks/blocks');
 jest.mock('../../../lib/modules/websocket/websocket');
-// jest.mock('../../../lib/shared/utils/big-number');
 jest.mock('../../../lib/services/hash/key-service');
 
 describe('Wallet class', () => {
@@ -65,28 +64,56 @@ describe('Wallet class', () => {
   });
 
   describe('receive', () => {
+    it('should fetch receivable transaction if no hash is provided', async () => {
+      wallet.receivable = jest.fn().mockResolvedValue(['transactionHash']);
+      wallet['receiveHash'] = jest.fn().mockResolvedValue('receivedHash');
+
+      const result = await wallet.receive();
+      expect(wallet.receivable).toHaveBeenCalledWith({ count: 1 });
+      expect(wallet['receiveHash']).toHaveBeenCalledWith('transactionHash');
+      expect(result).toEqual('receivedHash');
+    });
+
+    it('should return the the value of receiveHash', async () => {
+      wallet['receiveHash'] = jest.fn().mockResolvedValue('receivedHash');
+
+      const result = await wallet.receive('transactionHash');
+      expect(wallet['receiveHash']).toHaveBeenCalledWith('transactionHash');
+      expect(result).toEqual('receivedHash');
+    });
+
+    it('should call receive with the hash provided', async () => {
+      wallet['receiveHash'] = jest.fn();
+
+      await wallet.receive('transactionHash');
+      expect(wallet['receiveHash']).toHaveBeenCalledWith('transactionHash');
+    });
+
+    it('should return null if no receivable transaction is available', async () => {
+      wallet.receivable = jest.fn().mockResolvedValue([]);
+      const result = await wallet.receive();
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('receiveHash', () => {
     it('should receive a pending transaction and return the hash of the received block', async () => {
       const info = {
         balance: '1000000000000000000000000000000',
         frontier: 'frontierHash',
         representative: 'representative',
       };
-      const receivable = ['transactionHash'];
       const hashInfo = { amount: '5000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
-      wallet.receivable = jest.fn().mockResolvedValue(receivable);
       blocksMock.info.mockResolvedValue(hashInfo as any);
-      blocksMock.create.mockResolvedValue({ hash: 'createdReceiveHash' } as any);
-      blocksMock.process.mockResolvedValue('processedReceiveHash');
+      blocksMock.receiveBlock.mockResolvedValue('processedReceiveHash');
 
-      const result = await wallet.receive();
+      const result = await wallet['receiveHash']('transactionHash');
       expect(wallet.info).toHaveBeenCalledWith({
         representative: true,
         raw: true,
       });
-      expect(wallet.receivable).toHaveBeenCalledWith({ count: 1 });
-      expect(blocksMock.info).toHaveBeenCalledWith('transactionHash');
-      expect(blocksMock.create).toHaveBeenCalledWith({
+      expect(blocksMock.receiveBlock).toHaveBeenCalledWith({
         account: 'address',
         previous: 'frontierHash',
         representative: 'representative',
@@ -94,53 +121,73 @@ describe('Wallet class', () => {
         link: 'transactionHash',
         key: 'privateKey',
       });
-      expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdReceiveHash' }, 'receive');
       expect(result).toBe('processedReceiveHash');
-    });
-
-    it('should receive a pending transaction with the provided hash and return the hash of the received block', async () => {
-      const info = {
-        balance: '1000000000000000000000000000000',
-        frontier: 'frontierHash',
-        representative: 'representative',
-      };
-      const hashInfo = { amount: '5000000000000000000000000000000' };
-      wallet.info = jest.fn().mockResolvedValue(info);
-      wallet.receivable = jest.fn();
-      blocksMock.info.mockResolvedValue(hashInfo as any);
-      blocksMock.create.mockResolvedValue({ hash: 'createdReceiveHash' } as any);
-      blocksMock.process.mockResolvedValue('processedReceiveHash');
-
-      const result = await wallet.receive('transactionHash');
-      expect(wallet.info).toHaveBeenCalledWith({
-        representative: true,
-        raw: true,
-      });
-      expect(wallet.receivable).not.toHaveBeenCalled();
-      expect(blocksMock.info).toHaveBeenCalledWith('transactionHash');
-      expect(blocksMock.create).toHaveBeenCalledWith({
-        account: 'address',
-        previous: 'frontierHash',
-        representative: 'representative',
-        balance: '6000000000000000000000000000000',
-        link: 'transactionHash',
-        key: 'privateKey',
-      });
-      expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdReceiveHash' }, 'receive');
-      expect(result).toBe('processedReceiveHash');
-    });
-
-    it('should throw a NonaUserError if no receivable blocks are available', async () => {
-      wallet.info = jest.fn();
-      wallet.receivable = jest.fn().mockResolvedValue([]);
-      await expect(wallet.receive()).rejects.toThrow(NonaUserError);
-      await expect(wallet.receive()).rejects.toThrow('No receivable blocks');
     });
   });
 
   describe('receiveMultipleTransactions', () => {
+    it('should call receveiveHashes', () => {
+      wallet['receiveHashes'] = jest.fn();
+      wallet.receiveMultipleTransactions(['hash1', 'hash2']);
+      expect(wallet['receiveHashes']).toHaveBeenCalledWith(['hash1', 'hash2']);
+    });
+  });
+
+  describe('receiveAll', () => {
+    it('should call receiveHashes if hashes are provided', async () => {
+      const hashes = ['hash1', 'hash2'];
+      wallet.receivable = jest.fn();
+      wallet['receiveHashes'] = jest.fn().mockResolvedValue(['receivedHash1', 'receivedHash2']);
+
+      const result = await wallet.receiveAll(hashes);
+      expect(wallet.receivable).not.toHaveBeenCalled();
+      expect(wallet['receiveHashes']).toHaveBeenCalledWith(['hash1', 'hash2']);
+      expect(result).toEqual(['receivedHash1', 'receivedHash2']);
+    });
+
+    it('should fetch receivable transactions if no hashes are provided', async () => {
+      wallet.receivable = jest
+        .fn()
+        .mockResolvedValueOnce(['hash1', 'hash2'])
+        .mockResolvedValueOnce([]);
+      wallet['receiveHashes'] = jest.fn().mockResolvedValue(['receivedHash1', 'receivedHash2']);
+
+      const result = await wallet.receiveAll();
+      expect(wallet.receivable).toHaveBeenCalledWith({ count: 100 });
+      expect(wallet['receiveHashes']).toHaveBeenCalledWith(['hash1', 'hash2']);
+      expect(result).toEqual(['receivedHash1', 'receivedHash2']);
+    });
+
+    it('should fetch receivable while there are still transactions to receive', async () => {
+      wallet.receivable = jest
+        .fn()
+        .mockResolvedValueOnce(['hash1', 'hash2'])
+        .mockResolvedValueOnce(['hash3'])
+        .mockResolvedValueOnce([]);
+      wallet['receiveHashes'] = jest.fn().mockResolvedValue(['receivedHash1', 'receivedHash2']);
+
+      const result = await wallet.receiveAll();
+      expect(wallet.receivable).toHaveBeenCalledTimes(3);
+      expect(wallet['receiveHashes']).toHaveBeenCalledTimes(2);
+      expect(wallet['receiveHashes']).toHaveBeenNthCalledWith(1, ['hash1', 'hash2']);
+      expect(wallet['receiveHashes']).toHaveBeenNthCalledWith(2, ['hash3']);
+      expect(result).toEqual(['receivedHash1', 'receivedHash2', 'receivedHash1', 'receivedHash2']);
+    });
+
+    it('should handle the case when there are no receivable transactions initially', async () => {
+      wallet.receivable = jest.fn().mockResolvedValue([]);
+      wallet['receiveHashes'] = jest.fn();
+
+      const result = await wallet.receiveAll();
+      expect(wallet.receivable).toHaveBeenCalledWith({ count: 100 });
+      expect(wallet['receiveHashes']).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('receiveHashes', () => {
     it('should return an empty array if no hashes are provided', async () => {
-      const result = await wallet.receiveMultipleTransactions([]);
+      const result = await wallet['receiveHashes']([]);
       expect(result).toEqual([]);
     });
 
@@ -153,16 +200,15 @@ describe('Wallet class', () => {
       const hashInfo = { amount: '2000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
       blocksMock.info.mockResolvedValue(hashInfo as any);
-      blocksMock.create.mockResolvedValue({ hash: 'createdHash' } as any);
-      blocksMock.process.mockResolvedValue('processedHash');
+      blocksMock.receiveBlock.mockResolvedValue('processedHash');
 
       const hashes = ['hash1', 'hash2'];
-      const result = await wallet.receiveMultipleTransactions(hashes);
+      const result = await wallet['receiveHashes'](hashes);
 
       expect(wallet.info).toHaveBeenCalledTimes(1);
       expect(blocksMock.info).toHaveBeenCalledTimes(hashes.length);
-      expect(blocksMock.create).toHaveBeenCalledTimes(hashes.length);
-      expect(blocksMock.create).toHaveBeenNthCalledWith(1, {
+      expect(blocksMock.receiveBlock).toHaveBeenCalledTimes(hashes.length);
+      expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(1, {
         account: 'address',
         previous: 'frontierHash',
         representative: 'representative',
@@ -170,7 +216,7 @@ describe('Wallet class', () => {
         link: 'hash1',
         key: privateKey,
       });
-      expect(blocksMock.create).toHaveBeenNthCalledWith(2, {
+      expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(2, {
         account: 'address',
         previous: 'processedHash',
         representative: 'representative',
@@ -178,34 +224,7 @@ describe('Wallet class', () => {
         link: 'hash2',
         key: privateKey,
       });
-      expect(blocksMock.process).toHaveBeenCalledTimes(hashes.length);
       expect(result).toEqual(['processedHash', 'processedHash']);
-    });
-  });
-
-  describe('receiveAll', () => {
-    it('should receive all pending transactions and return hashes of the received blocks', async () => {
-      wallet.receivable = jest
-        .fn()
-        .mockResolvedValueOnce(['hash1', 'hash2'])
-        .mockResolvedValueOnce([]);
-      wallet.receiveMultipleTransactions = jest
-        .fn()
-        .mockResolvedValue(['receivedHash1', 'receivedHash2']);
-
-      const result = await wallet.receiveAll();
-
-      expect(wallet.receivable).toHaveBeenCalledTimes(2);
-      expect(wallet.receivable).toHaveBeenCalledWith({ count: 100 });
-      expect(wallet.receiveMultipleTransactions).toHaveBeenCalledWith(['hash1', 'hash2']);
-      expect(result).toEqual(['receivedHash1', 'receivedHash2']);
-    });
-
-    it('should handle the case when there are no receivable transactions initially', async () => {
-      wallet.receivable = jest.fn().mockResolvedValue([]);
-      const result = await wallet.receiveAll();
-      expect(wallet.receivable).toHaveBeenCalledWith({ count: 100 });
-      expect(result).toEqual([]);
     });
   });
 
@@ -263,7 +282,7 @@ describe('Wallet class', () => {
     it('should setup confirmation listener and automatically receive transactions', async () => {
       const subscriptionMock = new Subscription();
       const block = { hash: 'blockHash' };
-      wallet.receive = jest
+      wallet['receiveHash'] = jest
         .fn()
         .mockResolvedValueOnce('receivedHash')
         .mockRejectedValueOnce('error');
@@ -283,14 +302,14 @@ describe('Wallet class', () => {
           subtype: ['send'],
         },
       });
-      expect(wallet.receive).toHaveBeenCalledWith('blockHash');
+      expect(wallet['receiveHash']).toHaveBeenCalledWith('blockHash');
       expect(result).toBe(subscriptionMock);
     });
 
     it('should setup confirmation listener and automatically receive transactions and send the block to the callback', async () => {
       const subscriptionMock = new Subscription();
       const block = { hash: 'blockHash' };
-      wallet.receive = jest.fn().mockResolvedValue('receivedHash');
+      wallet['receiveHash'] = jest.fn().mockResolvedValue('receivedHash');
       wallet.listenConfirmation = jest.fn().mockReturnValue(subscriptionMock);
       const params = { next: jest.fn(), error: jest.fn() };
 
@@ -307,7 +326,7 @@ describe('Wallet class', () => {
           subtype: ['send'],
         },
       });
-      expect(wallet.receive).toHaveBeenCalledWith('blockHash');
+      expect(wallet['receiveHash']).toHaveBeenCalledWith('blockHash');
       expect(params.next).toHaveBeenCalledWith(block);
       expect(result).toBe(subscriptionMock);
     });
@@ -315,7 +334,7 @@ describe('Wallet class', () => {
     it('should handle error to the error callback', async () => {
       const subscriptionMock = new Subscription();
       const block = { hash: 'blockHash' };
-      wallet.receive = jest.fn().mockRejectedValueOnce('error');
+      wallet['receiveHash'] = jest.fn().mockRejectedValueOnce('error');
       wallet.listenConfirmation = jest.fn().mockReturnValue(subscriptionMock);
       const params = { next: jest.fn(), error: jest.fn() };
 
@@ -332,7 +351,7 @@ describe('Wallet class', () => {
           subtype: ['send'],
         },
       });
-      expect(wallet.receive).toHaveBeenCalledWith('blockHash');
+      expect(wallet['receiveHash']).toHaveBeenCalledWith('blockHash');
       expect(params.error).toHaveBeenCalledWith('error');
       expect(result).toBe(subscriptionMock);
     });
