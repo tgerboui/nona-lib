@@ -147,7 +147,6 @@ For more details about websocket, see [Websocket](#websocket).
   - [Send](#send)
   - [Receive](#receive)
   - [Receive all](#receive-all)
-  - [Receive multiple transactions](#receive-multiple-transactions)
   - [Listen and receive](#listen-and-receive)
 - [Account](#account)
   - [Receivable](#receivable)
@@ -232,21 +231,29 @@ await wallet.send(address, amount);
 ### Receive
 
 ```typescript
-receive(hash?: string): Promise<string>
+receive(hash?: string): Promise<string | null>
 ```
 
 Receives a pending transaction.  
 The hash of the transaction to receive can be provided. If not, a receivable hash will be used.  
-Returns the hash of the transaction.
+Returns the hash of the receive block.
+If no hash is provided and no transaction is pending, `null` is returned.
 
 ```typescript
 await wallet.receive();
 ```
 
+An hash can also be provided to receive a specific transaction:
+
+```typescript
+const hash = 'D83124BB...';
+await wallet.receive(hash);
+```
+
 ### Receive all
 
 ```typescript
-receiveAll(): Promise<string[]>
+receiveAll(hashes?: string[]): Promise<string[]>
 ```
 
 Receives all pending transactions.  
@@ -256,19 +263,11 @@ Returns an array of hashes of the received blocks.
 await wallet.receiveAll();
 ```
 
-### Receive multiple transactions
-
-```typescript
-receiveMultipleTransactions(hashes: string[]): Promise<string[]>
-```
-
-Receives multiple pending transactions.  
-From an array of hashes of the transactions to receive.  
-Returns an array of hashes of the received blocks.
+An array of hashes can also be provided to receive specific transactions:
 
 ```typescript
 const hashes = ['D83124BB...', '1208FF64...'];
-await wallet.receiveMultipleTransactions(hashes);
+await wallet.receiveAll(hashes);
 ```
 
 ### Listen and receive
@@ -949,8 +948,9 @@ Each types of errors are extended from `NonaError` and have a specific instance.
 
 `NonaError` - Base class for all errors and generic error.  
 `NonaNetworkError` - Network error, likely related to the node connection.  
-`NonaRpcError` - Error related to the RPC call response. If this occured while using the library and you are not using custom RPC call, please report it.  
-`NonaParseError` - Error related to the response parsing. If this occured while using the library, please report it.  
+`NonaRpcError` - Error related to the RPC call response. 
+`NonaParseError` - Error related to the response parsing.  
+If this occured while using the library, please report it.  
 `NonaUserError` - Error related to the user input.  
 For example, if you try to send a transaction with an insufficient balance:
 
