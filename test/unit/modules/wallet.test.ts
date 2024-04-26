@@ -238,6 +238,7 @@ describe('Wallet class', () => {
       wallet.info = jest.fn().mockResolvedValue(info);
       blocksMock.create.mockResolvedValue({ hash: 'createdSendHash' } as any);
       blocksMock.process.mockResolvedValue('processedSendHash');
+      KeyService.getPublicKey = jest.fn().mockReturnValue('publicKey');
 
       const result = await wallet.send('destinationAddress', '1');
       expect(wallet.info).toHaveBeenCalledWith({
@@ -249,9 +250,10 @@ describe('Wallet class', () => {
         previous: 'frontierHash',
         representative: 'representative',
         balance: '4000000000000000000000000000000', // Adjusted for unit conversion in test setup
-        link: 'destinationAddress',
+        link: 'publicKey',
         key: privateKey,
       });
+      expect(KeyService.getPublicKey).toHaveBeenCalledWith('destinationAddress');
       expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdSendHash' }, 'send');
       expect(result).toBe('processedSendHash');
     });
