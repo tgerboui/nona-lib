@@ -169,7 +169,7 @@ For more details about websocket, see [Websocket](#websocket).
   - [Expand](#expand)
 - [Key Service](#key-service)
   - [Generate seed](#generate-seed)
-  - [Get secret key](#get-secret-key)
+  - [Get private key](#get-private-key)
   - [Get public key](#get-public-key)
   - [Get address](#get-address)
 - [Node](#node)
@@ -843,16 +843,16 @@ Generates a random seed.
 const seed = await KeyService.generateSeed();
 ```
 
-### Get secret key
+### Get private key
 
 ```typescript
-KeyService.getSecretKey(seed: string, index: number): string
+KeyService.getPrivateKey(seed: string, index: number): string
 ```
 
-Derive a secret key from a seed, given an index.
+Derive a private key from a seed, given an index.
 
 ```typescript
-const privateKey = KeyService.getSecretKey(seed, 0);
+const privateKey = KeyService.getPrivateKey(seed, 0);
 ```
 
 ### Get public key
@@ -861,7 +861,7 @@ const privateKey = KeyService.getSecretKey(seed, 0);
 KeyService.getPublicKey(privateKeyOrAddress: string): string
 ```
 
-Derive a public key from a secret key or an address.
+Derive a public key from a private key or an address.
 
 ```typescript
 const publicKey = KeyService.getPublicKey(privateKey);

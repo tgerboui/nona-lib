@@ -14,7 +14,7 @@ export class Key {
       generativeSeed = await KeyService.generateSeed();
     }
 
-    const privateKey = KeyService.getSecretKey(generativeSeed, 0);
+    const privateKey = KeyService.getPrivateKey(generativeSeed, 0);
     const publicKey = KeyService.getPublicKey(privateKey);
     const address = KeyService.getAddress(publicKey);
 

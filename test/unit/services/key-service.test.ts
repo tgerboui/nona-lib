@@ -24,13 +24,13 @@ describe('KeyService', () => {
     expect(result).toBe(seed);
   });
 
-  it('should derive a secret key', () => {
+  it('should derive a private key', () => {
     const seed = 'cca6fda2102c958239b2e0f02e688414c23939271b7bcfe0d5014ab246071c12';
     const index = 0;
     const secretKey = 'secretKey123';
     (deriveSecretKey as jest.Mock).mockReturnValue(secretKey);
 
-    const result = KeyService.getSecretKey(seed, index);
+    const result = KeyService.getPrivateKey(seed, index);
 
     expect(deriveSecretKey).toHaveBeenCalledWith(seed, index);
     expect(result).toBe(secretKey);
