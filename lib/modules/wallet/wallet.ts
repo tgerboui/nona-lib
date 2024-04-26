@@ -138,6 +138,7 @@ export class Wallet extends Account {
       throw new NonaUserError('Insufficient balance');
     }
     const finalBalance = balance.minus(rawAmount);
+    const receiverPublicKey = KeyService.getPublicKey(address);
 
     // TODO: Maybe set create block in a function in this class
     const block = await this.blocks.create({
@@ -145,7 +146,7 @@ export class Wallet extends Account {
       previous: info.frontier,
       representative: info.representative,
       balance: finalBalance.toString(),
-      link: address,
+      link: receiverPublicKey,
       key: this.privateKey,
     });
 

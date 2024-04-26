@@ -24,11 +24,11 @@ export class KeyService {
   /**
    * Derive a public key from a secret key.
    *
-   * @param privateKey - Private key to generate the public key from, in hexadecimal or address format
+   * @param privateKeyOrAddress - Private key or adress to derive the public key from, in hexadecimal or address format
    * @returns Public key, in hexadecimal format
    */
-  public static getPublicKey(privateKey: string): string {
-    return derivePublicKey(privateKey);
+  public static getPublicKey(privateKeyOrAddress: string): string {
+    return derivePublicKey(privateKeyOrAddress);
   }
 
   /**
