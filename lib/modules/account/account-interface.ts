@@ -1,3 +1,4 @@
+import { NanoAddress } from '../../shared/utils/address';
 import {
   ConfirmationFilter,
   WebSocketConfirmationParams,
@@ -68,7 +69,7 @@ export interface AccountHistoryParams {
   /** Reverse order */
   reverse?: boolean;
   /** Results will be filtered to only show sends/receives connected to the provided account(s). */
-  accounts?: string[];
+  accounts?: NanoAddress[];
   /**
    * if set to true instead of the default false, returns all blocks history and output all parameters of the block itself.
    */

@@ -1,5 +1,6 @@
 import { filter, finalize, map, Observable, Subscription } from 'rxjs';
 
+import { NanoAddress } from '../../../shared/utils/address';
 import { WebSocketManager } from '../manager/websocket-manager';
 import { WebSocketConfirmationHelper } from './websocket-confirmation-helper';
 import {
@@ -11,7 +12,7 @@ import {
 
 // TODO: Need to refactor this file
 export class WebSocketConfirmation {
-  private accountListened = new Map<string, number>();
+  private accountListened = new Map<NanoAddress, number>();
   private observable: Observable<unknown>;
   private subscriptionCount = 0;
   private subscriptionToAll = 0;
@@ -43,10 +44,10 @@ export class WebSocketConfirmation {
       });
   }
 
-  private getAccountsToListen(confirmationFilter?: ConfirmationFilter): string[] | undefined {
+  private getAccountsToListen(confirmationFilter?: ConfirmationFilter): NanoAddress[] | undefined {
     if (!confirmationFilter) return undefined;
     const { accounts, to } = confirmationFilter;
-    const accountsToListen = [];
+    const accountsToListen: NanoAddress[] = [];
 
     let filtered = false;
     if (accounts) {
@@ -63,7 +64,7 @@ export class WebSocketConfirmation {
     return uniqueAccounts;
   }
 
-  private addSubscription(accounts?: string[]): void {
+  private addSubscription(accounts?: NanoAddress[]): void {
     if (this.subscriptionCount === 0) {
       this.subscribeWebSocket(accounts);
     }
@@ -85,7 +86,7 @@ export class WebSocketConfirmation {
     this.subscriptionCount += 1;
   }
 
-  private removeSubscription(accounts?: string[]): void {
+  private removeSubscription(accounts?: NanoAddress[]): void {
     if (accounts) {
       const accountsRemoved = this.removeAccountsFromListened(accounts);
       if (this.subscriptionToAll === 0 && this.subscriptionCount > 1) {
@@ -104,8 +105,8 @@ export class WebSocketConfirmation {
     }
   }
 
-  private addAccountsToListened(accounts: string[]): string[] {
-    const addedAccount: string[] = [];
+  private addAccountsToListened(accounts: NanoAddress[]): NanoAddress[] {
+    const addedAccount: NanoAddress[] = [];
 
     for (const account of accounts) {
       const accountMap = this.accountListened.get(account);
@@ -120,8 +121,8 @@ export class WebSocketConfirmation {
     return addedAccount;
   }
 
-  private removeAccountsFromListened(accounts: string[]): string[] {
-    const accountRemoved: string[] = [];
+  private removeAccountsFromListened(accounts: NanoAddress[]): NanoAddress[] {
+    const accountRemoved: NanoAddress[] = [];
 
     for (const account of accounts) {
       const accountMap = this.accountListened.get(account);
@@ -138,7 +139,7 @@ export class WebSocketConfirmation {
     return accountRemoved;
   }
 
-  private subscribeWebSocket(accounts?: string[]): void {
+  private subscribeWebSocket(accounts?: NanoAddress[]): void {
     this.webSocketManager.subscribeTopic({
       topic: 'confirmation',
       options: accounts

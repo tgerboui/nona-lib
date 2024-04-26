@@ -16,7 +16,7 @@ describe('Key', () => {
       const seed = 'test-seed';
       const privateKey = 'privateKey';
       const publicKey = 'publicKey';
-      const address = 'address';
+      const address = 'nano_address';
 
       keyServiceMock.getPrivateKey.mockReturnValue(privateKey);
       keyServiceMock.getPublicKey.mockReturnValue(publicKey);
@@ -33,7 +33,7 @@ describe('Key', () => {
       const generatedSeed = 'generated-seed';
       const privateKey = 'privateKey';
       const publicKey = 'publicKey';
-      const address = 'address';
+      const address = 'nano_address';
 
       keyServiceMock.generateSeed.mockResolvedValue(generatedSeed);
       keyServiceMock.getPrivateKey.mockReturnValue(privateKey);
@@ -53,7 +53,7 @@ describe('Key', () => {
     it('should expand private key to public key and address', () => {
       const privateKey = 'privateKey';
       const publicKey = 'publicKey';
-      const address = 'address';
+      const address = 'nano_address';
 
       keyServiceMock.getPublicKey.mockReturnValue(publicKey);
       keyServiceMock.getAddress.mockReturnValue(address);

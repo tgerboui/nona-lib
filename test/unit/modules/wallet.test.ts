@@ -23,7 +23,7 @@ describe('Wallet class', () => {
 
   beforeEach(() => {
     keyServiceMock.getPublicKey.mockReturnValue('publicKey');
-    keyServiceMock.getAddress.mockReturnValue('address');
+    keyServiceMock.getAddress.mockReturnValue('nano_address');
     rpcMock = new Rpc({ url: 'http://example.com' }) as jest.Mocked<Rpc>;
     blocksMock = new Blocks(rpcMock) as jest.Mocked<Blocks>;
     websocketMock = new NonaWebSocket({ url: 'http://example.com' }) as jest.Mocked<NonaWebSocket>;
@@ -32,7 +32,7 @@ describe('Wallet class', () => {
 
   it('should initialize properties correctly', () => {
     expect(wallet.publicKey).toEqual('publicKey');
-    expect(wallet.address).toEqual('address');
+    expect(wallet.address).toEqual('nano_address');
   });
 
   describe('open', () => {
@@ -42,12 +42,12 @@ describe('Wallet class', () => {
       blocksMock.create.mockResolvedValue({ hash: 'createdHash' } as any);
       blocksMock.process.mockResolvedValue('processedHash');
 
-      const result = await wallet.open('representative');
+      const result = await wallet.open('nano_representative');
       expect(wallet.receivable).toHaveBeenCalledWith({ count: 1, sort: true });
       expect(blocksMock.create).toHaveBeenCalledWith({
         previous: '0',
-        representative: 'representative',
-        account: 'address',
+        representative: 'nano_representative',
+        account: 'nano_address',
         link: 'blockHash',
         balance: '100',
         key: privateKey,
@@ -58,8 +58,8 @@ describe('Wallet class', () => {
 
     it('should throw an error if no receivable blocks are available', async () => {
       wallet.receivable = jest.fn().mockResolvedValue({});
-      await expect(wallet.open('representative')).rejects.toThrow(NonaUserError);
-      await expect(wallet.open('representative')).rejects.toThrow('No receivable blocks');
+      await expect(wallet.open('nano_representative')).rejects.toThrow(NonaUserError);
+      await expect(wallet.open('nano_representative')).rejects.toThrow('No receivable blocks');
     });
   });
 
@@ -101,7 +101,7 @@ describe('Wallet class', () => {
       const info = {
         balance: '1000000000000000000000000000000',
         frontier: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
       };
       const hashInfo = { amount: '5000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
@@ -114,9 +114,9 @@ describe('Wallet class', () => {
         raw: true,
       });
       expect(blocksMock.receiveBlock).toHaveBeenCalledWith({
-        account: 'address',
+        account: 'nano_address',
         previous: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
         balance: '6000000000000000000000000000000',
         link: 'transactionHash',
         key: 'privateKey',
@@ -195,7 +195,7 @@ describe('Wallet class', () => {
       const info = {
         balance: '1000000000000000000000000000000',
         frontier: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
       };
       const hashInfo = { amount: '2000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
@@ -209,17 +209,17 @@ describe('Wallet class', () => {
       expect(blocksMock.info).toHaveBeenCalledTimes(hashes.length);
       expect(blocksMock.receiveBlock).toHaveBeenCalledTimes(hashes.length);
       expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(1, {
-        account: 'address',
+        account: 'nano_address',
         previous: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
         balance: '3000000000000000000000000000000',
         link: 'hash1',
         key: privateKey,
       });
       expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(2, {
-        account: 'address',
+        account: 'nano_address',
         previous: 'processedHash',
-        representative: 'representative',
+        representative: 'nano_representative',
         balance: '5000000000000000000000000000000',
         link: 'hash2',
         key: privateKey,
@@ -233,22 +233,22 @@ describe('Wallet class', () => {
       const info = {
         balance: '5000000000000000000000000000000',
         frontier: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
       };
       wallet.info = jest.fn().mockResolvedValue(info);
       blocksMock.create.mockResolvedValue({ hash: 'createdSendHash' } as any);
       blocksMock.process.mockResolvedValue('processedSendHash');
       KeyService.getPublicKey = jest.fn().mockReturnValue('publicKey');
 
-      const result = await wallet.send('destinationAddress', '1');
+      const result = await wallet.send('nano_destinationAddress', '1');
       expect(wallet.info).toHaveBeenCalledWith({
         representative: true,
         raw: true,
       });
       expect(blocksMock.create).toHaveBeenCalledWith({
-        account: 'address',
+        account: 'nano_address',
         previous: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
         balance: '4000000000000000000000000000000', // Adjusted for unit conversion in test setup
         link: 'publicKey',
         key: privateKey,
@@ -259,24 +259,26 @@ describe('Wallet class', () => {
     });
 
     it('should throw a NonaUserError if the amount is not a valid number', async () => {
-      await expect(wallet.send('destinationAddress', '')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('destinationAddress', '')).rejects.toThrow('Invalid amount');
-      await expect(wallet.send('destinationAddress', '-12')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('destinationAddress', '-12')).rejects.toThrow('Invalid amount');
-      await expect(wallet.send('destinationAddress', '0')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('destinationAddress', '0')).rejects.toThrow('Invalid amount');
+      await expect(wallet.send('nano_destinationAddress', '')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send('nano_destinationAddress', '')).rejects.toThrow('Invalid amount');
+      await expect(wallet.send('nano_destinationAddress', '-12')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send('nano_destinationAddress', '-12')).rejects.toThrow('Invalid amount');
+      await expect(wallet.send('nano_destinationAddress', '0')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send('nano_destinationAddress', '0')).rejects.toThrow('Invalid amount');
     });
 
     it('sould throw a NonaUserError if the balance of the acount is insufficient', async () => {
       const info = {
         balance: '0',
         frontier: 'frontierHash',
-        representative: 'representative',
+        representative: 'nano_representative',
       };
       wallet.info = jest.fn().mockResolvedValue(info);
 
-      await expect(wallet.send('destinationAddress', '1')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('destinationAddress', '1')).rejects.toThrow('Insufficient balance');
+      await expect(wallet.send('nano_destinationAddress', '1')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send('nano_destinationAddress', '1')).rejects.toThrow(
+        'Insufficient balance',
+      );
     });
   });
 
@@ -366,14 +368,14 @@ describe('Wallet class', () => {
       blocksMock.create.mockResolvedValue({ hash: 'createdChangeHash' } as any);
       blocksMock.process.mockResolvedValue('processedChangeHash');
 
-      const result = await wallet.change('newRepresentative');
+      const result = await wallet.change('nano_newRepresentative');
       expect(wallet.info).toHaveBeenCalledWith({
         raw: true,
       });
       expect(blocksMock.create).toHaveBeenCalledWith({
-        account: 'address',
+        account: 'nano_address',
         previous: 'frontierHash',
-        representative: 'newRepresentative',
+        representative: 'nano_newRepresentative',
         balance: '1000',
         link: '0',
         key: privateKey,

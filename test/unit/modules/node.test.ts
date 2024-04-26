@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 import { Node } from '../../../lib/modules/node/node';
 import { Rpc } from '../../../lib/services/rpc/rpc';
 

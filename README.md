@@ -211,7 +211,7 @@ await wallet.open(representative);
 ### Send
 
 ```typescript
-send(address: string, amount: number | string): Promise<string>
+send(address: NanoAddress, amount: number | string): Promise<string>
 ```
 
 Sends a transaction to the specified address.  

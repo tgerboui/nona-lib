@@ -1,4 +1,3 @@
-import { Rpc } from './services/rpc/rpc';
 import { Account } from './modules/account/account';
 import { Blocks } from './modules/blocks/blocks';
 import { Key } from './modules/key/key';
@@ -6,6 +5,8 @@ import { Node } from './modules/node/node';
 import { NonaParams } from './modules/nona/nona-interface';
 import { Wallet } from './modules/wallet/wallet';
 import { NonaWebSocket } from './modules/websocket/websocket';
+import { Rpc } from './services/rpc/rpc';
+import { NanoAddress } from './shared/utils/address';
 
 export class Nona {
   private remoteProcedureCall: Rpc;
@@ -28,7 +29,7 @@ export class Nona {
     this.key = new Key();
   }
 
-  public account(address: string): Account {
+  public account(address: NanoAddress): Account {
     return new Account(address, this.ws, this.remoteProcedureCall);
   }
 

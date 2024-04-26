@@ -11,18 +11,18 @@ describe('WebSocket Confirmation Functions', () => {
   describe('messageMapper', () => {
     it('should map a confirmation message to a ConfirmationBlock', () => {
       const mockMessage = {
-        account: 'rootAccount',
+        account: 'nano_rootAccount',
         amount: '1000000000000000000000000000000', // 1 nano in raw unit
         hash: 'hashValue',
         confirmation_type: 'confirmation_type',
         block: {
           type: 'typeValue',
-          account: 'blockAccount',
+          account: 'nano_blockAccount',
           previous: 'previousHash',
-          representative: 'representativeValue',
+          representative: 'nano_representativeValue',
           balance: '2000000000000000000000000000000',
           link: 'linkValue',
-          link_as_account: 'toAccount',
+          link_as_account: 'nano_toAccount',
           signature: 'signatureValue',
           work: 'workValue',
           subtype: 'send',
@@ -32,17 +32,17 @@ describe('WebSocket Confirmation Functions', () => {
       const result = websocketConfirmationHelper.messageMapper(mockMessage);
 
       expect(result).toEqual({
-        account: 'rootAccount',
+        account: 'nano_rootAccount',
         amount: '1',
         hash: 'hashValue',
         confirmationType: 'confirmation_type',
         block: {
-          account: 'blockAccount',
+          account: 'nano_blockAccount',
           previous: 'previousHash',
-          representative: 'representativeValue',
+          representative: 'nano_representativeValue',
           balance: '2',
           link: 'linkValue',
-          linkAsAccount: 'toAccount',
+          linkAsAccount: 'nano_toAccount',
           signature: 'signatureValue',
           work: 'workValue',
           subtype: 'send',

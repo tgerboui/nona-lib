@@ -4,6 +4,7 @@ import { KeyService } from '../../services/hash/key-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { UnitService } from '../../services/unit/unit-service';
 import { NonaUserError } from '../../shared/errors/user-error';
+import { NanoAddress } from '../../shared/utils/address';
 import { NonaBigNumber } from '../../shared/utils/big-number';
 import { Account } from '../account/account';
 import { Blocks } from '../blocks/blocks';
@@ -16,7 +17,7 @@ import { WalletListAndReceiveParams } from './wallet-interface';
  */
 export class Wallet extends Account {
   public publicKey: string;
-  public address: string;
+  public address: NanoAddress;
 
   constructor(
     private privateKey: string,
@@ -41,7 +42,7 @@ export class Wallet extends Account {
    * @param representative The representative to open the wallet with.
    * @returns A promise that resolves to the hash of the opened block.
    */
-  public async open(representative: string): Promise<string> {
+  public async open(representative: NanoAddress): Promise<string> {
     // Highest hash
     const lastHashes = await this.receivable({ count: 1, sort: true });
     if (Object.keys(lastHashes).length === 0) {
@@ -122,7 +123,7 @@ export class Wallet extends Account {
    * @param amount The amount to send in nano unit.
    * @returns A promise that resolves to the hash of the sent block.
    */
-  public async send(address: string, amount: number | string): Promise<string> {
+  public async send(address: NanoAddress, amount: number | string): Promise<string> {
     // Convert nano amout to raw amount
     const rawAmount = UnitService.nanoToRaw(amount);
     if (rawAmount.isLessThanOrEqualTo(0) || rawAmount.isNaN()) {
@@ -192,7 +193,7 @@ export class Wallet extends Account {
    * @param representative The new representative to set.
    * @returns A promise that resolves to the hash of the changed block.
    */
-  public async change(representative: string): Promise<string> {
+  public async change(representative: NanoAddress): Promise<string> {
     const info = await this.info({
       raw: true,
     });

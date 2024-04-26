@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { UnitService } from '../../services/unit/unit-service';
+import { zNanoAddress } from '../../shared/utils/address';
 
 export const ReceivableValues = z.object({
   blocks: z.record(z.string()).or(z.string()),
@@ -36,7 +37,7 @@ export type AccountInfo = z.infer<typeof AccountInfo>;
 
 export const AccountInfoRepresentative = AccountInfo.extend({
   /** Account address of the currently set representative for this account. */
-  representative: z.string(),
+  representative: zNanoAddress(),
 });
 export type AccountInfoRepresentative = z.infer<typeof AccountInfoRepresentative>;
 
@@ -69,7 +70,7 @@ export type AccountHistoryPagination = z.infer<typeof AccountHistoryPagination>;
 
 export const AccountHistoryBlock = z.object({
   /** Account address of the block. */
-  account: z.string(),
+  account: zNanoAddress(),
   /** Amount of the block in nano unit */
   amount: z.string().transform((amount) => UnitService.rawToNanoString(amount)),
   /** Type of block. */
@@ -85,7 +86,7 @@ export type AccountHistoryBlock = z.infer<typeof AccountHistoryBlock>;
 
 export const AccountHistoryRawBlock = AccountHistoryBlock.extend({
   /** Account address of the block. Not present if it's a 'receive' or 'send' block. */
-  account: z.string().optional(),
+  account: zNanoAddress().optional(),
   /** Amount of the block in raw unit. Not present if it's a 'receive' or 'send' block. */
   amount: z.string().optional(),
   /** Account address of the representative for this account. */

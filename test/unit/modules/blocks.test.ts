@@ -30,9 +30,9 @@ describe('Blocks', () => {
 
   it('should call block_create RPC method with the provided params and parse the result', async () => {
     const createParams: CreateBlockParams = {
-      account: 'account',
+      account: 'nano_account',
       previous: 'previousHash',
-      representative: 'representative',
+      representative: 'nano_representative',
       balance: '1000',
       key: 'privateKey',
       link: 'link',
@@ -42,7 +42,7 @@ describe('Blocks', () => {
     const block: Block['block'] = {
       ...createParamsWithoutKey,
       type: 'state',
-      link_as_account: 'linkAsAccount',
+      link_as_account: 'nano_linkAsAccount',
       signature: 'signature',
       work: 'work',
     };
@@ -62,12 +62,12 @@ describe('Blocks', () => {
   it('should call process RPC method with the provided block and subtype, and parse the result', async () => {
     const block: Block['block'] = {
       type: 'state',
-      account: 'account',
+      account: 'nano_account',
       previous: 'previousHash',
-      representative: 'representative',
+      representative: 'nano_representative',
       balance: '1000',
       link: 'link',
-      link_as_account: 'linkAsAccount',
+      link_as_account: 'nano_linkAsAccount',
       signature: 'signature',
       work: 'work',
     };
@@ -88,7 +88,7 @@ describe('Blocks', () => {
   it('should call block_info RPC method with the provided hash and parse the result', async () => {
     const hash = 'blockHash';
     const infoResponse = {
-      block_account: 'block_account',
+      block_account: 'nano_block_account',
       amount: 'amount',
       balance: 'balance',
       height: 'height',
@@ -97,12 +97,12 @@ describe('Blocks', () => {
       confirmed: 'confirmed',
       contents: {
         type: 'type',
-        account: 'account',
+        account: 'nano_account',
         previous: 'previous',
         representative: 'representative',
         balance: 'balance',
         link: 'link',
-        link_as_account: 'link_as_account',
+        link_as_account: 'nano_link_as_account',
         signature: 'signature',
         work: 'work',
       },

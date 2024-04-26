@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zNanoAddress } from '../../shared/utils/address';
 
 export const BlockCount = z.object({
   /** The total number of blocks in the ledger. This includes all send, receive, open, and change blocks. */
@@ -14,12 +15,12 @@ export const Block = z.object({
   hash: z.string(),
   block: z.object({
     type: z.string(),
-    account: z.string(),
+    account: zNanoAddress(),
     previous: z.string(),
-    representative: z.string(),
+    representative: zNanoAddress(),
     balance: z.string(),
     link: z.string(),
-    link_as_account: z.string(),
+    link_as_account: zNanoAddress(),
     signature: z.string(),
     work: z.string(),
   }),
@@ -33,7 +34,7 @@ export type BlockProcess = z.infer<typeof BlockProcess>;
 
 // TODO: Comment each fields
 export const BlockInfo = z.object({
-  block_account: z.string(),
+  block_account: zNanoAddress(),
   amount: z.string(),
   balance: z.string(),
   height: z.string(),
@@ -42,12 +43,12 @@ export const BlockInfo = z.object({
   confirmed: z.string(),
   contents: z.object({
     type: z.string(),
-    account: z.string(),
+    account: zNanoAddress(),
     previous: z.string(),
     representative: z.string(),
     balance: z.string(),
     link: z.string(),
-    link_as_account: z.string(),
+    link_as_account: zNanoAddress(),
     signature: z.string(),
     work: z.string(),
   }),
