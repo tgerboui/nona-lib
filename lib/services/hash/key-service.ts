@@ -24,7 +24,7 @@ export class KeyService {
   /**
    * Derive a public key from a private key.
    *
-   * @param privateKeyOrAddress - Private key or adress to derive the public key from, in hexadecimal or address format
+   * @param privateKeyOrAddress - Private key or address to derive the public key from, in hexadecimal or address format
    * @returns Public key, in hexadecimal format
    */
   public static getPublicKey(privateKeyOrAddress: string): string {
