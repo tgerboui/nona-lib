@@ -740,6 +740,7 @@ You have currently 3 nano in your account.
 const wallet = nona.wallet(privateKey);
 const info = await wallet.info();
 const recipient = 'nano_1send...';
+const recipientPublicKey = KeyService.getPublicKey(recipient);
 
 const sendBlock = await this.blocks.create({
   // Current account 
@@ -753,7 +754,7 @@ const sendBlock = await this.blocks.create({
   // If the block is sending funds, set link to the public key of the destination account.
   // If it is receiving funds, set link to the hash of the block to receive.
   // If the block has no balance change but is updating representative only, set link to 0. 
-  link: recipient,
+  link: recipientPublicKey,
   // Private key of the account 
   key: privateKey,
 });
@@ -857,10 +858,10 @@ const privateKey = KeyService.getSecretKey(seed, 0);
 ### Get public key
 
 ```typescript
-KeyService.getPublicKey(privateKey: string): string
+KeyService.getPublicKey(privateKeyOrAddress: string): string
 ```
 
-Derive a public key from a secret key.
+Derive a public key from a secret key or an address.
 
 ```typescript
 const publicKey = KeyService.getPublicKey(privateKey);
