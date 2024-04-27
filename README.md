@@ -196,7 +196,7 @@ const wallet = nona.wallet(privateKey);
 ### Open
 
 ```typescript
-open(representative: string): Promise<string>
+open(representative: NanoTarget): Promise<string>
 ```
 
 Opens the account with the provided representative.  
@@ -211,7 +211,7 @@ await wallet.open(representative);
 ### Send
 
 ```typescript
-send(address: NanoAddress, amount: number | string): Promise<string>
+send(target: NanoTarget, amount: number | string): Promise<string>
 ```
 
 Sends a transaction to the specified address.  
@@ -474,7 +474,7 @@ export interface ConfirmationFilter {
   /** List of block subtypes to filter the confirmation blocks. */
   subtype?: string[];
   /** Account addresses that received the transaction. */
-  to?: string[];
+  to?: NanoAddress[];
 }
 ````
 
@@ -515,7 +515,7 @@ export interface AccountHistoryParams {
   /** Reverse order */
   reverse?: boolean;
   /** Results will be filtered to only show sends/receives connected to the provided account(s). */
-  accounts?: string[];
+  accounts?: NanoAddress[];
   /**
    * if set to true instead of the default false, returns all blocks history and output all parameters of the block itself.
    */
@@ -658,11 +658,11 @@ interface WebSocketConfirmationParams {
 
 interface ConfirmationFilter {
   /** List of account addresses to filter the confirmation blocks. */
-  accounts?: string[];
+  accounts?: NanoAddress[];
   /** List of block subtypes to filter the confirmation blocks. */
   subtype?: string[];
   /** Account addresses that received the transaction. */
-  to?: string[];
+  to?: NanoAddress[];
 }
 ```
 
