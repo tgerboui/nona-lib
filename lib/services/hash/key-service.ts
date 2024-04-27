@@ -11,24 +11,24 @@ export class KeyService {
   }
 
   /**
-   * Derive a secret key from a seed, given an index.
+   * Derive a private key from a seed, given an index.
    *
-   * @param seed - The seed to generate the secret key from, in hexadecimal format
-   * @param index - The index to generate the secret key from
-   * @returns Secret key, in hexadecimal format
+   * @param seed - The seed to generate the private key from, in hexadecimal format
+   * @param index - The index to generate the private key from
+   * @returns Private key, in hexadecimal format
    */
-  public static getSecretKey(seed: string, index: number): string {
+  public static getPrivateKey(seed: string, index: number): string {
     return deriveSecretKey(seed, index);
   }
 
   /**
-   * Derive a public key from a secret key.
+   * Derive a public key from a private key.
    *
-   * @param privateKey - Private key to generate the public key from, in hexadecimal or address format
+   * @param privateKeyOrAddress - Private key or address to derive the public key from, in hexadecimal or address format
    * @returns Public key, in hexadecimal format
    */
-  public static getPublicKey(privateKey: string): string {
-    return derivePublicKey(privateKey);
+  public static getPublicKey(privateKeyOrAddress: string): string {
+    return derivePublicKey(privateKeyOrAddress);
   }
 
   /**

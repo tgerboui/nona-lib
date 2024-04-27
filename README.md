@@ -169,7 +169,7 @@ For more details about websocket, see [Websocket](#websocket).
   - [Expand](#expand)
 - [Key Service](#key-service)
   - [Generate seed](#generate-seed)
-  - [Get secret key](#get-secret-key)
+  - [Get private key](#get-private-key)
   - [Get public key](#get-public-key)
   - [Get address](#get-address)
 - [Node](#node)
@@ -736,6 +736,7 @@ You have currently 3 nano in your account.
 const wallet = nona.wallet(privateKey);
 const info = await wallet.info();
 const recipient = 'nano_1send...';
+const recipientPublicKey = KeyService.getPublicKey(recipient);
 
 const sendBlock = await this.blocks.create({
   // Current account 
@@ -749,7 +750,7 @@ const sendBlock = await this.blocks.create({
   // If the block is sending funds, set link to the public key of the destination account.
   // If it is receiving funds, set link to the hash of the block to receive.
   // If the block has no balance change but is updating representative only, set link to 0. 
-  link: recipient,
+  link: recipientPublicKey,
   // Private key of the account 
   key: privateKey,
 });
@@ -838,25 +839,25 @@ Generates a random seed.
 const seed = await KeyService.generateSeed();
 ```
 
-### Get secret key
+### Get private key
 
 ```typescript
-KeyService.getSecretKey(seed: string, index: number): string
+KeyService.getPrivateKey(seed: string, index: number): string
 ```
 
-Derive a secret key from a seed, given an index.
+Derive a private key from a seed, given an index.
 
 ```typescript
-const privateKey = KeyService.getSecretKey(seed, 0);
+const privateKey = KeyService.getPrivateKey(seed, 0);
 ```
 
 ### Get public key
 
 ```typescript
-KeyService.getPublicKey(privateKey: string): string
+KeyService.getPublicKey(privateKeyOrAddress: string): string
 ```
 
-Derive a public key from a secret key.
+Derive a public key from a private key or an address.
 
 ```typescript
 const publicKey = KeyService.getPublicKey(privateKey);
