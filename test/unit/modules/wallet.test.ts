@@ -5,6 +5,7 @@ import { Blocks } from '../../../lib/modules/blocks/blocks';
 import { Wallet } from '../../../lib/modules/wallet/wallet';
 import { NonaWebSocket } from '../../../lib/modules/websocket/websocket';
 import { KeyService } from '../../../lib/services/hash/key-service';
+import { NameService } from '../../../lib/services/name/name-service';
 import { Rpc } from '../../../lib/services/rpc/rpc';
 import { NonaUserError } from '../../../lib/shared/errors/user-error';
 
@@ -15,6 +16,7 @@ jest.mock('../../../lib/services/hash/key-service');
 
 describe('Wallet class', () => {
   const keyServiceMock = KeyService as jest.Mocked<typeof KeyService>;
+  let nameServiceMock: NameService;
   let wallet: Wallet;
   let rpcMock: jest.Mocked<Rpc>;
   let blocksMock: jest.Mocked<Blocks>;
@@ -24,10 +26,14 @@ describe('Wallet class', () => {
   beforeEach(() => {
     keyServiceMock.getPublicKey.mockReturnValue('publicKey');
     keyServiceMock.getAddress.mockReturnValue('nano_address');
+
+    nameServiceMock = new NameService();
+    jest.spyOn(nameServiceMock, 'resolveUsername').mockResolvedValue('nano_resolved_address');
+
     rpcMock = new Rpc({ url: 'http://example.com' }) as jest.Mocked<Rpc>;
     blocksMock = new Blocks(rpcMock) as jest.Mocked<Blocks>;
     websocketMock = new NonaWebSocket({ url: 'http://example.com' }) as jest.Mocked<NonaWebSocket>;
-    wallet = new Wallet(privateKey, blocksMock, rpcMock, websocketMock);
+    wallet = new Wallet(nameServiceMock, privateKey, blocksMock, rpcMock, websocketMock);
   });
 
   it('should initialize properties correctly', () => {
