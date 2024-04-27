@@ -8,6 +8,7 @@ import { KeyService } from '../../../lib/services/hash/key-service';
 import { NameService } from '../../../lib/services/name/name-service';
 import { Rpc } from '../../../lib/services/rpc/rpc';
 import { NonaUserError } from '../../../lib/shared/errors/user-error';
+import { randomNanoAddress, randomNanoAddresses, randomPublicKey } from '../../utils/utils';
 
 jest.mock('../../../lib/services/rpc/rpc');
 jest.mock('../../../lib/modules/blocks/blocks');
@@ -23,9 +24,12 @@ describe('Wallet class', () => {
   let websocketMock: jest.Mocked<NonaWebSocket>;
   const privateKey = 'privateKey';
 
+  const walletAddressMock = randomNanoAddress();
+  const publicKeyMock = randomPublicKey();
+
   beforeEach(() => {
-    keyServiceMock.getPublicKey.mockReturnValue('publicKey');
-    keyServiceMock.getAddress.mockReturnValue('nano_address');
+    keyServiceMock.getPublicKey.mockReturnValue(publicKeyMock);
+    keyServiceMock.getAddress.mockReturnValue(walletAddressMock);
 
     nameServiceMock = new NameService();
     jest.spyOn(nameServiceMock, 'resolveUsername').mockResolvedValue('nano_resolved_address');
@@ -37,23 +41,24 @@ describe('Wallet class', () => {
   });
 
   it('should initialize properties correctly', () => {
-    expect(wallet.publicKey).toEqual('publicKey');
-    expect(wallet.address).toEqual('nano_address');
+    expect(wallet.publicKey).toEqual(publicKeyMock);
+    expect(wallet.address).toEqual(walletAddressMock);
   });
 
   describe('open', () => {
     it('should open an account and return the hash of the opened block', async () => {
+      const representative = randomNanoAddress();
       const lastHashes = { blockHash: '100' };
       wallet.receivable = jest.fn().mockResolvedValue(lastHashes);
       blocksMock.create.mockResolvedValue({ hash: 'createdHash' } as any);
       blocksMock.process.mockResolvedValue('processedHash');
 
-      const result = await wallet.open('nano_representative');
+      const result = await wallet.open(representative);
       expect(wallet.receivable).toHaveBeenCalledWith({ count: 1, sort: true });
       expect(blocksMock.create).toHaveBeenCalledWith({
         previous: '0',
-        representative: 'nano_representative',
-        account: 'nano_address',
+        representative: representative,
+        account: walletAddressMock,
         link: 'blockHash',
         balance: '100',
         key: privateKey,
@@ -64,8 +69,9 @@ describe('Wallet class', () => {
 
     it('should throw an error if no receivable blocks are available', async () => {
       wallet.receivable = jest.fn().mockResolvedValue({});
-      await expect(wallet.open('nano_representative')).rejects.toThrow(NonaUserError);
-      await expect(wallet.open('nano_representative')).rejects.toThrow('No receivable blocks');
+      const representative = randomNanoAddress();
+      await expect(wallet.open(representative)).rejects.toThrow(NonaUserError);
+      await expect(wallet.open(representative)).rejects.toThrow('No receivable blocks');
     });
   });
 
@@ -120,7 +126,7 @@ describe('Wallet class', () => {
         raw: true,
       });
       expect(blocksMock.receiveBlock).toHaveBeenCalledWith({
-        account: 'nano_address',
+        account: walletAddressMock,
         previous: 'frontierHash',
         representative: 'nano_representative',
         balance: '6000000000000000000000000000000',
@@ -198,10 +204,11 @@ describe('Wallet class', () => {
     });
 
     it('should receive multiple transactions and return hashes of the received blocks', async () => {
+      const representative = randomNanoAddress();
       const info = {
         balance: '1000000000000000000000000000000',
         frontier: 'frontierHash',
-        representative: 'nano_representative',
+        representative: representative,
       };
       const hashInfo = { amount: '2000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
@@ -215,17 +222,17 @@ describe('Wallet class', () => {
       expect(blocksMock.info).toHaveBeenCalledTimes(hashes.length);
       expect(blocksMock.receiveBlock).toHaveBeenCalledTimes(hashes.length);
       expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(1, {
-        account: 'nano_address',
+        account: walletAddressMock,
         previous: 'frontierHash',
-        representative: 'nano_representative',
+        representative: representative,
         balance: '3000000000000000000000000000000',
         link: 'hash1',
         key: privateKey,
       });
       expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(2, {
-        account: 'nano_address',
+        account: walletAddressMock,
         previous: 'processedHash',
-        representative: 'nano_representative',
+        representative: representative,
         balance: '5000000000000000000000000000000',
         link: 'hash2',
         key: privateKey,
@@ -236,55 +243,58 @@ describe('Wallet class', () => {
 
   describe('send', () => {
     it('should send a transaction to the specified address and return the hash of the sent block', async () => {
+      const [representative, toAccount] = randomNanoAddresses(2);
       const info = {
         balance: '5000000000000000000000000000000',
         frontier: 'frontierHash',
-        representative: 'nano_representative',
+        representative: representative,
       };
       wallet.info = jest.fn().mockResolvedValue(info);
       blocksMock.create.mockResolvedValue({ hash: 'createdSendHash' } as any);
       blocksMock.process.mockResolvedValue('processedSendHash');
       KeyService.getPublicKey = jest.fn().mockReturnValue('publicKey');
 
-      const result = await wallet.send('nano_destinationAddress', '1');
+      const result = await wallet.send(toAccount, '1');
       expect(wallet.info).toHaveBeenCalledWith({
         representative: true,
         raw: true,
       });
       expect(blocksMock.create).toHaveBeenCalledWith({
-        account: 'nano_address',
+        account: walletAddressMock,
         previous: 'frontierHash',
-        representative: 'nano_representative',
+        representative: representative,
         balance: '4000000000000000000000000000000', // Adjusted for unit conversion in test setup
         link: 'publicKey',
         key: privateKey,
       });
-      expect(KeyService.getPublicKey).toHaveBeenCalledWith('destinationAddress');
+      expect(KeyService.getPublicKey).toHaveBeenCalledWith(toAccount);
       expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdSendHash' }, 'send');
       expect(result).toBe('processedSendHash');
     });
 
     it('should throw a NonaUserError if the amount is not a valid number', async () => {
-      await expect(wallet.send('nano_destinationAddress', '')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('nano_destinationAddress', '')).rejects.toThrow('Invalid amount');
-      await expect(wallet.send('nano_destinationAddress', '-12')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('nano_destinationAddress', '-12')).rejects.toThrow('Invalid amount');
-      await expect(wallet.send('nano_destinationAddress', '0')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('nano_destinationAddress', '0')).rejects.toThrow('Invalid amount');
+      const destinationAddress = randomNanoAddress();
+
+      await expect(wallet.send(destinationAddress, '')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send(destinationAddress, '')).rejects.toThrow('Invalid amount');
+      await expect(wallet.send(destinationAddress, '-12')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send(destinationAddress, '-12')).rejects.toThrow('Invalid amount');
+      await expect(wallet.send(destinationAddress, '0')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send(destinationAddress, '0')).rejects.toThrow('Invalid amount');
     });
 
     it('sould throw a NonaUserError if the balance of the acount is insufficient', async () => {
+      const [destinationAddress, representative] = randomNanoAddresses(2);
+
       const info = {
         balance: '0',
         frontier: 'frontierHash',
-        representative: 'nano_representative',
+        representative: representative,
       };
       wallet.info = jest.fn().mockResolvedValue(info);
 
-      await expect(wallet.send('nano_destinationAddress', '1')).rejects.toThrow(NonaUserError);
-      await expect(wallet.send('nano_destinationAddress', '1')).rejects.toThrow(
-        'Insufficient balance',
-      );
+      await expect(wallet.send(destinationAddress, '1')).rejects.toThrow(NonaUserError);
+      await expect(wallet.send(destinationAddress, '1')).rejects.toThrow('Insufficient balance');
     });
   });
 
@@ -369,19 +379,20 @@ describe('Wallet class', () => {
 
   describe('change', () => {
     it('should change the representative of the account and return the hash of the changed block', async () => {
+      const newRepresentative = randomNanoAddress();
       const info = { balance: '1000', frontier: 'frontierHash' };
       wallet.info = jest.fn().mockResolvedValue(info);
       blocksMock.create.mockResolvedValue({ hash: 'createdChangeHash' } as any);
       blocksMock.process.mockResolvedValue('processedChangeHash');
 
-      const result = await wallet.change('nano_newRepresentative');
+      const result = await wallet.change(newRepresentative);
       expect(wallet.info).toHaveBeenCalledWith({
         raw: true,
       });
       expect(blocksMock.create).toHaveBeenCalledWith({
-        account: 'nano_address',
+        account: walletAddressMock,
         previous: 'frontierHash',
-        representative: 'nano_newRepresentative',
+        representative: newRepresentative,
         balance: '1000',
         link: '0',
         key: privateKey,

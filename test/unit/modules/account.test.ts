@@ -4,6 +4,7 @@ import { Account } from '../../../lib/modules/account/account';
 import { ListenConfirmationParams } from '../../../lib/modules/account/account-interface';
 import { NonaWebSocket } from '../../../lib/modules/websocket/websocket';
 import { Rpc } from '../../../lib/services/rpc/rpc';
+import { randomNanoAddress, randomNanoAddresses } from '../../utils/utils';
 
 jest.mock('../../../lib/services/rpc/rpc');
 jest.mock('../../../lib/modules/websocket/websocket');
@@ -13,10 +14,12 @@ describe('Account', () => {
   let rpcMock: jest.Mocked<Rpc>;
   let websocketMock: jest.Mocked<NonaWebSocket>;
 
+  const accountAddressMock = randomNanoAddress();
+
   beforeEach(() => {
     rpcMock = new Rpc({ url: 'http://example.com' }) as jest.Mocked<Rpc>;
     websocketMock = new NonaWebSocket({ url: 'http://example.com' }) as jest.Mocked<NonaWebSocket>;
-    account = new Account('nano_test-address', websocketMock, rpcMock);
+    account = new Account(accountAddressMock, websocketMock, rpcMock);
   });
 
   describe('receivable', () => {
@@ -26,7 +29,7 @@ describe('Account', () => {
 
       const result = await account.receivable();
       expect(rpcMock.call).toHaveBeenCalledWith('receivable', {
-        account: 'nano_test-address',
+        account: accountAddressMock,
         count: 100,
         sorting: false,
       });
@@ -39,7 +42,7 @@ describe('Account', () => {
 
       const result = await account.receivable({ count: 2, sort: true });
       expect(rpcMock.call).toHaveBeenCalledWith('receivable', {
-        account: 'nano_test-address',
+        account: accountAddressMock,
         count: 2,
         sorting: true,
       });
@@ -81,7 +84,7 @@ describe('Account', () => {
       const result = await account.info();
       expect(rpcMock.call).toHaveBeenCalledWith('account_info', {
         representative: false,
-        account: 'nano_test-address',
+        account: accountAddressMock,
       });
       expect(result).toEqual({
         ...rpcResponse,
@@ -121,7 +124,7 @@ describe('Account', () => {
 
       const result = await account.balance();
       expect(rpcMock.call).toHaveBeenCalledWith('account_balance', {
-        account: 'nano_test-address',
+        account: accountAddressMock,
       });
       expect(result).toEqual({
         balance: '0.001',
@@ -158,7 +161,7 @@ describe('Account', () => {
 
       expect(websocketMock.confirmation).toHaveBeenCalledWith({
         ...params,
-        filter: { ...params.filter, accounts: ['nano_test-address'] },
+        filter: { ...params.filter, accounts: [accountAddressMock] },
       });
       expect(result).toBe(subscriptionMock);
     });
@@ -166,12 +169,14 @@ describe('Account', () => {
 
   describe('history', () => {
     it('should fetch and return account history', async () => {
+      const [fromAccount] = randomNanoAddresses(1);
+
       const rpcResponse = {
-        account: 'nano_test-address',
+        account: accountAddressMock,
         history: [
           {
             type: 'send',
-            account: 'nano_test-address',
+            account: fromAccount,
             amount: '1000000000000000000000000000',
             hash: 'block-hash',
             local_timestamp: '123456789',
@@ -179,7 +184,7 @@ describe('Account', () => {
           },
           {
             type: 'receive',
-            account: 'nano_test-address',
+            account: fromAccount,
             amount: '1000000000000000000000000000',
             hash: 'block-hash',
             local_timestamp: '123456789',
@@ -193,7 +198,7 @@ describe('Account', () => {
       const result = await account.history();
 
       expect(rpcMock.call).toHaveBeenCalledWith('account_history', {
-        account: 'nano_test-address',
+        account: accountAddressMock,
         count: 100,
         raw: false,
       });
@@ -202,7 +207,7 @@ describe('Account', () => {
         history: [
           {
             type: 'send',
-            account: 'nano_test-address',
+            account: fromAccount,
             amount: '0.001',
             hash: 'block-hash',
             local_timestamp: 123456789,
@@ -210,7 +215,7 @@ describe('Account', () => {
           },
           {
             type: 'receive',
-            account: 'nano_test-address',
+            account: fromAccount,
             amount: '0.001',
             hash: 'block-hash',
             local_timestamp: 123456789,
@@ -224,11 +229,11 @@ describe('Account', () => {
 
     it('should fetch and return raw account history', async () => {
       const rpcResponse = {
-        account: 'nano_test-address',
+        account: accountAddressMock,
         history: [
           {
             type: 'send',
-            account: 'nano_test-address',
+            account: accountAddressMock,
             amount: '1000000000000000000000000000',
             hash: 'block-hash',
             local_timestamp: '123456789',
@@ -244,7 +249,7 @@ describe('Account', () => {
           },
           {
             type: 'receive',
-            account: 'nano_test-address',
+            account: accountAddressMock,
             amount: '1000000000000000000000000000',
             hash: 'block-hash',
             local_timestamp: '123456789',
@@ -266,7 +271,7 @@ describe('Account', () => {
       const result = await account.history({ count: 2, raw: true });
 
       expect(rpcMock.call).toHaveBeenCalledWith('account_history', {
-        account: 'nano_test-address',
+        account: accountAddressMock,
         count: 2,
         raw: true,
       });
@@ -275,7 +280,7 @@ describe('Account', () => {
         history: [
           {
             type: 'send',
-            account: 'nano_test-address',
+            account: accountAddressMock,
             amount: '1000000000000000000000000000',
             hash: 'block-hash',
             local_timestamp: 123456789,
@@ -291,7 +296,7 @@ describe('Account', () => {
           },
           {
             type: 'receive',
-            account: 'nano_test-address',
+            account: accountAddressMock,
             amount: '1000000000000000000000000000',
             hash: 'block-hash',
             local_timestamp: 123456789,
@@ -319,7 +324,7 @@ describe('Account', () => {
 
       const result = await account.blockCount();
       expect(rpcMock.call).toHaveBeenCalledWith('account_block_count', {
-        account: 'nano_test-address',
+        account: accountAddressMock,
       });
       expect(result).toBe(10);
     });

@@ -1,3 +1,4 @@
+import { checkAddress } from 'nanocurrency';
 import { z } from 'zod';
 
 /**
@@ -14,10 +15,10 @@ export const isValidNanoUsername = (address: string): address is NanoUsername =>
 export type NanoAddress = `nano_${string}`;
 
 export const isValidNanoAddress = (address: string): address is NanoAddress =>
-  address.startsWith('nano_');
+  checkAddress(address);
 
 export const zNanoAddress = (): z.ZodEffects<z.ZodString, NanoAddress, string> =>
-  z.string().refine(isValidNanoAddress, "Address has to start with 'nano_'");
+  z.string().refine(isValidNanoAddress, 'Invalid nano address');
 
 /**
  * Either a {@link NanoAddress} or a {@link NanoUsername}

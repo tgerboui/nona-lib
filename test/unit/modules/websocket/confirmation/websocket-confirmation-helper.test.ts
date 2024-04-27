@@ -1,5 +1,6 @@
 import { WebSocketConfirmationHelper } from '../../../../../lib/modules/websocket/confirmation/websocket-confirmation-helper';
 import { NonaParseError } from '../../../../../lib/shared/errors/parse-error';
+import { randomNanoAddresses } from '../../../../utils/utils';
 
 describe('WebSocket Confirmation Functions', () => {
   let websocketConfirmationHelper: WebSocketConfirmationHelper;
@@ -9,20 +10,22 @@ describe('WebSocket Confirmation Functions', () => {
   });
 
   describe('messageMapper', () => {
+    const [rootAccount, blockAccount, representative, toAccount] = randomNanoAddresses(4);
+
     it('should map a confirmation message to a ConfirmationBlock', () => {
       const mockMessage = {
-        account: 'nano_rootAccount',
+        account: rootAccount,
         amount: '1000000000000000000000000000000', // 1 nano in raw unit
         hash: 'hashValue',
         confirmation_type: 'confirmation_type',
         block: {
           type: 'typeValue',
-          account: 'nano_blockAccount',
+          account: blockAccount,
           previous: 'previousHash',
-          representative: 'nano_representativeValue',
+          representative: representative,
           balance: '2000000000000000000000000000000',
           link: 'linkValue',
-          link_as_account: 'nano_toAccount',
+          link_as_account: toAccount,
           signature: 'signatureValue',
           work: 'workValue',
           subtype: 'send',
@@ -32,17 +35,17 @@ describe('WebSocket Confirmation Functions', () => {
       const result = websocketConfirmationHelper.messageMapper(mockMessage);
 
       expect(result).toEqual({
-        account: 'nano_rootAccount',
+        account: rootAccount,
         amount: '1',
         hash: 'hashValue',
         confirmationType: 'confirmation_type',
         block: {
-          account: 'nano_blockAccount',
+          account: blockAccount,
           previous: 'previousHash',
-          representative: 'nano_representativeValue',
+          representative: representative,
           balance: '2',
           link: 'linkValue',
-          linkAsAccount: 'nano_toAccount',
+          linkAsAccount: toAccount,
           signature: 'signatureValue',
           work: 'workValue',
           subtype: 'send',

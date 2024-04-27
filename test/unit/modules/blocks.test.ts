@@ -2,6 +2,7 @@ import { Blocks } from '../../../lib/modules/blocks/blocks';
 import { CreateBlockParams } from '../../../lib/modules/blocks/blocks-interface';
 import { Block, BlockInfo } from '../../../lib/modules/blocks/blocks-schema';
 import { Rpc } from '../../../lib/services/rpc/rpc';
+import { randomNanoAddresses } from '../../utils/utils';
 
 // TODO: separate all mthods tests in describe blocks
 describe('Blocks', () => {
@@ -29,10 +30,12 @@ describe('Blocks', () => {
   });
 
   it('should call block_create RPC method with the provided params and parse the result', async () => {
+    const [fromAccount, representative, linkAsAccount] = randomNanoAddresses(3);
+
     const createParams: CreateBlockParams = {
-      account: 'nano_account',
+      account: fromAccount,
       previous: 'previousHash',
-      representative: 'nano_representative',
+      representative: representative,
       balance: '1000',
       key: 'privateKey',
       link: 'link',
@@ -42,7 +45,7 @@ describe('Blocks', () => {
     const block: Block['block'] = {
       ...createParamsWithoutKey,
       type: 'state',
-      link_as_account: 'nano_linkAsAccount',
+      link_as_account: linkAsAccount,
       signature: 'signature',
       work: 'work',
     };
@@ -86,9 +89,11 @@ describe('Blocks', () => {
   });
 
   it('should call block_info RPC method with the provided hash and parse the result', async () => {
+    const [blockAccount, contentsAccount, contentsLinkAsAccount] = randomNanoAddresses(3);
+
     const hash = 'blockHash';
     const infoResponse = {
-      block_account: 'nano_block_account',
+      block_account: blockAccount,
       amount: 'amount',
       balance: 'balance',
       height: 'height',
@@ -97,12 +102,12 @@ describe('Blocks', () => {
       confirmed: 'confirmed',
       contents: {
         type: 'type',
-        account: 'nano_account',
+        account: contentsAccount,
         previous: 'previous',
         representative: 'representative',
         balance: 'balance',
         link: 'link',
-        link_as_account: 'nano_link_as_account',
+        link_as_account: contentsLinkAsAccount,
         signature: 'signature',
         work: 'work',
       },
