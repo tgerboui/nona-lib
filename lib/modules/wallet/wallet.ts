@@ -199,7 +199,9 @@ export class Wallet extends Account {
    * @param representative The new representative to set.
    * @returns A promise that resolves to the hash of the changed block.
    */
-  public async change(representative: NanoAddress): Promise<string> {
+  public async change(representative: NanoTarget): Promise<string> {
+    representative = await this.nameService.resolveTarget(representative);
+
     const info = await this.info({
       raw: true,
     });
