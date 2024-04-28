@@ -177,8 +177,13 @@ For more details about websocket, see [Websocket](#websocket).
   - [Uptime](#uptime)
   - [Version](#version)
 - [Rpc](#rpc)
-- [Datatypes](#datatypes)
-  - [NanoTarget](#nanotarget)
+- [Name Service](#name-service)
+  - [Resolve Username](#resolve-username)
+  - [Resolve Target](#resolve-target)
+- [Datatypes](#datatypess)
+  - [Nano Address](#nano-address)
+  - [Nano Username](#nano-username)
+  - [Nano Target](#nano-target)
 
 ## Wallet
 
@@ -941,11 +946,66 @@ const info = await nona.rpc('account_info', {
 });
 ```
 
+## Name Service
+
+### Resolve Username
+
+```typescript
+resolveUsername(username: NanoUsername): Promise<NanoAddress>
+```
+
+Resolves a username registered with the [Nano Name Service](https://nano.to) to the registed [NanoAddress](#nano-address)
+
+```typescript
+const username = '@nona-lib';
+const address = resolveUsername(username): Promise<NanoAddress>
+```
+
+### Resolve Target
+
+```typescript
+resolveTarget(target: NanoTarget): Promise<NanoAddress>
+```
+
+Takes in a [NanoTarget](#nano-target) to potentially resolve. It checks if the target is a valid [NanoAddress](#nano-address) or a [NanoUsername](#nano-username). In the case a [NanoUsername](#nano-username) is passed to the method, it is [automatically resolved](#resolve-username)
+
+```typescript
+const target = '@nona-lib';
+const address = resolveTarget(target): Promise<NanoAddress>
+```
+
+```typescript
+const target = 'nano_1rece';
+const address = resolveTarget(target): Promise<NanoAddress>
+```
+
 ## Datatypes
 
-### NanoTarget
+### Nano Address
 
-A NanoTarget is either a valid address (e.g. `nano_1rece...`) or a resolveable username registered with the [Nano Name Service](nano.to) (e.g. `@nona-lib`). Nonalib automatically resolves these usernames to valid adresses for you.
+A valid Nano address according to the [offical docs](https://docs.nano.org/integration-guides/the-basics/#account-public-address):
+
+```
+nano_1anrzcuwe64rwxzcco8dkhpyxpi8kd7zsjc1oeimpc3ppca4mrjtwnqposrs
+```
+
+Its validity is checked with the [nanocurrency-js](https://github.com/marvinroger/nanocurrency-js/tree/master/packages/nanocurrency) package.
+
+
+### Nano Username
+
+A Nano username in the form of `@name`:
+
+```
+@nona-lib
+```
+
+This username is resolved at runtime with the [Nano Name Service](https://nano.to).
+
+
+### Nano Target
+
+A NanoTarget is either a valid [address](#nano-address) (e.g. `nano_1rece...`) or a resolveable username registered with the [Nano Name Service](https://nano.to) (e.g. `@nona-lib`). Nonalib automatically resolves these usernames to valid adresses for you.
 
 ## Handling Errors
 
