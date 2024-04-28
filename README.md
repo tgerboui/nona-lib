@@ -1069,7 +1069,7 @@ We encourage the community to contribute to the development and testing of Nona 
 
 #### Nano.to
 
-- [ ] Integrate [Nano name service](https://github.com/fwd/nano-to) (in progress)
+- [x] Integrate [Nano Name Service](https://github.com/fwd/nano-to)
 - [ ] Integrate [rpc.nano.to](https://rpc.nano.to/) commands
 
 ### Tests
