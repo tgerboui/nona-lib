@@ -12,8 +12,8 @@ import { Rpc } from '../rpc/rpc';
 import { NameInfo } from './name-schemas';
 
 export class NameService extends RpcConsummer {
-  constructor() {
-    super(new Rpc({ url: 'http://rpc.nano.to' }));
+  constructor(rpc = new Rpc({ url: 'https://rpc.nano.to' })) {
+    super(rpc);
   }
   public async resolveUsername(username: NanoUsername): Promise<NanoAddress> {
     const res = await this.rpc.call('account_key', { account: username });

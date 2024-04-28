@@ -12,8 +12,7 @@ describe('NameService', () => {
 
   beforeEach(() => {
     rpcMock = new Rpc({ url: 'http://example.com' }) as jest.Mocked<Rpc>;
-    nameService = new NameService();
-    nameService['rpc'] = rpcMock;
+    nameService = new NameService(rpcMock);
   });
 
   it('should initialize properties correctly', () => {
