@@ -177,6 +177,8 @@ For more details about websocket, see [Websocket](#websocket).
   - [Uptime](#uptime)
   - [Version](#version)
 - [Rpc](#rpc)
+- [Datatypes](#datatypes)
+  - [NanoTarget](#nanotarget)
 
 ## Wallet
 
@@ -199,7 +201,8 @@ const wallet = nona.wallet(privateKey);
 open(representative: NanoTarget): Promise<string>
 ```
 
-Opens the account with the provided representative.  
+Opens the account with the provided representative represented as a [NanoTarget](#nanotarget).
+
 The first transaction of an account is crafted in a [slightly different way](https://docs.nano.org/integration-guides/key-management/#first-receive-transaction). To open an account, you must have sent some funds to it from another account.  
 Returns the hash of the transaction.
 
@@ -214,7 +217,7 @@ await wallet.open(representative);
 send(target: NanoTarget, amount: number | string): Promise<string>
 ```
 
-Sends a transaction to the specified address.  
+Sends a transaction to the specified [target](#nanotarget).
 The amount is in nano unit.  
 Returns the hash of the transaction.
 
@@ -937,6 +940,12 @@ const info = await nona.rpc('account_info', {
   account: 'nano_13e2ue...',
 });
 ```
+
+## Datatypes
+
+### NanoTarget
+
+A NanoTarget is either a valid address (e.g. `nano_1rece...`) or a resolveable username registered with the [Nano Name Service](nano.to) (e.g. `@nona-lib`). Nonalib automatically resolves these usernames to valid adresses for you.
 
 ## Handling Errors
 
