@@ -206,7 +206,7 @@ const wallet = nona.wallet(privateKey);
 open(representative: NanoTarget): Promise<string>
 ```
 
-Opens the account with the provided representative represented as a [NanoTarget](#nanotarget).
+Opens the account with the provided representative represented as a [NanoTarget](#nano-target) string.
 
 The first transaction of an account is crafted in a [slightly different way](https://docs.nano.org/integration-guides/key-management/#first-receive-transaction). To open an account, you must have sent some funds to it from another account.  
 Returns the hash of the transaction.
@@ -222,7 +222,7 @@ await wallet.open(representative);
 send(target: NanoTarget, amount: number | string): Promise<string>
 ```
 
-Sends a transaction to the specified [target](#nanotarget).
+Sends a transaction to the specified [target](#nano-target).
 The amount is in nano unit.  
 Returns the hash of the transaction.
 
@@ -948,6 +948,12 @@ const info = await nona.rpc('account_info', {
 
 ## Name Service
 
+You can access to the `nameService` object with the following code:
+
+\```typescript
+const nameService = nona.nameService;
+\```
+
 ### Resolve Username
 
 ```typescript
@@ -958,7 +964,7 @@ Resolves a username registered with the [Nano Name Service](https://nano.to) to 
 
 ```typescript
 const username = '@nona-lib';
-const address = resolveUsername(username): Promise<NanoAddress>
+const address = await nona.nameService.resolveUsername(username);
 ```
 
 ### Resolve Target
@@ -971,12 +977,12 @@ Takes in a [NanoTarget](#nano-target) to potentially resolve. It checks if the t
 
 ```typescript
 const target = '@nona-lib';
-const address = resolveTarget(target): Promise<NanoAddress>
+const address = await nona.nameService.resolveTarget(target);
 ```
 
 ```typescript
-const target = 'nano_1rece';
-const address = resolveTarget(target): Promise<NanoAddress>
+const target = 'nano_1rece...';
+const address = await nona.nameService.resolveTarget(target);
 ```
 
 ## Datatypes
