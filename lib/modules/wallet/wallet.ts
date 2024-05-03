@@ -54,15 +54,15 @@ export class Wallet extends Account {
       throw new NonaUserError('No receivable blocks');
     }
 
-    const hash = Object.keys(lastHashes)[0];
-    const hashValue = lastHashes[hash];
+    const link = Object.keys(lastHashes)[0];
+    const hashValue = lastHashes[link];
 
     // Generate work
     const block = await this.blocks.create({
       previous: '0',
       representative,
       account: this.address,
-      link: hash,
+      link,
       balance: hashValue,
       key: this.privateKey,
     });
