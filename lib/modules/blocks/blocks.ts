@@ -1,6 +1,14 @@
+import { hashBlock, signBlock } from 'nanocurrency';
+
 import { RpcConsummer } from '../rpc-consumer/rpc-consumer';
-import { BlockProcessSubtype, CreateBlockParams } from './blocks-interface';
-import { Block, BlockCount, BlockInfo, BlockProcess } from './blocks-schema';
+import {
+  SignedBlock,
+  BlockProcessSubtype,
+  BlockSignParams,
+  CreateBlockParams,
+  HashBlockParams,
+} from './blocks-interface';
+import { BlockCount, BlockInfo, BlockProcess } from './blocks-schema';
 
 export class Blocks extends RpcConsummer {
   /**
@@ -15,19 +23,32 @@ export class Blocks extends RpcConsummer {
   }
 
   /**
-   * Creates a new block based on input data & signed with private key or account in wallet.
+   * Creates a new block based on input data & signed with private key.
    *
    * @param params - The options for creating the block.
    * @returns A promise that resolves to the created block.
    */
-  public async create(params: CreateBlockParams): Promise<Block['block']> {
-    const res = await this.rpc.call('block_create', {
-      json_block: 'true',
-      type: 'state',
-      ...params,
+  public create(params: CreateBlockParams): SignedBlock {
+    const unsignedBlock = {
+      account: params.account,
+      previous: params.previous,
+      representative: params.representative,
+      balance: params.balance,
+      link: params.link,
+      work: params.work,
+    };
+    const hash = this.hash(unsignedBlock);
+    const signature = this.sign({
+      hash,
+      privateKey: params.privateKey,
     });
 
-    return this.parseHandler(res, Block).block;
+    const block = {
+      ...unsignedBlock,
+      type: 'state',
+      signature,
+    };
+    return block;
   }
 
   /**
@@ -37,7 +58,7 @@ export class Blocks extends RpcConsummer {
    * @param subtype - The subtype of the block
    * @returns A promise that resolves to the hash of the published block
    */
-  public async process(block: Block['block'], subtype: BlockProcessSubtype): Promise<string> {
+  public async process(block: SignedBlock, subtype: BlockProcessSubtype): Promise<string> {
     const res = await this.rpc.call('process', {
       json_block: 'true',
       subtype,
@@ -68,9 +89,40 @@ export class Blocks extends RpcConsummer {
    * @param block - The block to be received.
    * @returns A promise that resolves to the hash of the published block
    */
-  public async receiveBlock(block: CreateBlockParams): Promise<string> {
-    const createdBlock = await this.create(block);
+  public receiveBlock(block: CreateBlockParams): Promise<string> {
+    const createdBlock = this.create(block);
 
     return this.process(createdBlock, 'receive');
+  }
+
+  /**
+   * Get the hash of a block
+   *
+   * @param params
+   * @returns
+   */
+  public hash(params: HashBlockParams): string {
+    let previous = params.previous;
+    if (previous === '0') {
+      previous = '0000000000000000000000000000000000000000000000000000000000000000';
+    }
+
+    return hashBlock({
+      ...params,
+      previous,
+    });
+  }
+
+  /**
+   * Signs a block using the provided hash and private key.
+   *
+   * @param params - The parameters required for signing the block.
+   * @returns The signed block.
+   */
+  public sign(params: BlockSignParams): string {
+    return signBlock({
+      hash: params.hash,
+      secretKey: params.privateKey,
+    });
   }
 }

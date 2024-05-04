@@ -8,6 +8,7 @@ import { NonaWebSocket } from './modules/websocket/websocket';
 import { NameService } from './services/name/name-service';
 import { Rpc } from './services/rpc/rpc';
 import { NanoAddress } from './shared/utils/address';
+import { Work } from './modules/work/work';
 
 export class Nona {
   private remoteProcedureCall: Rpc;
@@ -17,6 +18,7 @@ export class Nona {
   public blocks: Blocks;
   public key: Key;
   public node: Node;
+  public work: Work;
 
   constructor({
     /** URL of the node */
@@ -29,6 +31,7 @@ export class Nona {
     this.ws = new NonaWebSocket({ url: websocketUrl });
     this.blocks = new Blocks(this.remoteProcedureCall);
     this.node = new Node(this.remoteProcedureCall);
+    this.work = new Work(this.remoteProcedureCall);
     this.key = new Key();
   }
 
@@ -37,7 +40,14 @@ export class Nona {
   }
 
   public wallet(privateKey: string): Wallet {
-    return new Wallet(this.nameService, privateKey, this.blocks, this.remoteProcedureCall, this.ws);
+    return new Wallet(
+      this.nameService,
+      privateKey,
+      this.blocks,
+      this.work,
+      this.remoteProcedureCall,
+      this.ws,
+    );
   }
 
   /**

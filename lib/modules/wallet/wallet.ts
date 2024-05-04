@@ -12,6 +12,7 @@ import { Blocks } from '../blocks/blocks';
 import { ConfirmationBlock } from '../websocket/confirmation/websocket-confirmation-interface';
 import { NonaWebSocket } from '../websocket/websocket';
 import { WalletListAndReceiveParams } from './wallet-interface';
+import { Work } from '../work/work';
 
 /**
  * Handle wallet operations such as opening, receiving, sending, and changing representatives.
@@ -24,6 +25,7 @@ export class Wallet extends Account {
     private nameService: NameService,
     private privateKey: string,
     private blocks: Blocks,
+    private work: Work,
     rpc: Rpc,
     websocket: NonaWebSocket,
   ) {
@@ -57,14 +59,15 @@ export class Wallet extends Account {
     const link = Object.keys(lastHashes)[0];
     const hashValue = lastHashes[link];
 
-    // Generate work
-    const block = await this.blocks.create({
+    const { work } = await this.work.generate(this.publicKey);
+    const block = this.blocks.create({
       previous: '0',
       representative,
       account: this.address,
       link,
       balance: hashValue,
-      key: this.privateKey,
+      privateKey: this.privateKey,
+      work,
     });
 
     // Broadcast to network
@@ -147,14 +150,15 @@ export class Wallet extends Account {
     const finalBalance = balance.minus(rawAmount);
     const receiverPublicKey = KeyService.getPublicKey(target);
 
-    // TODO: Maybe set create block in a function in this class
-    const block = await this.blocks.create({
+    const { work } = await this.work.generate(info.frontier);
+    const block = this.blocks.create({
       account: this.address,
       previous: info.frontier,
       representative: info.representative,
       balance: finalBalance.toString(),
       link: receiverPublicKey,
-      key: this.privateKey,
+      privateKey: this.privateKey,
+      work,
     });
 
     return this.blocks.process(block, 'send');
@@ -206,13 +210,15 @@ export class Wallet extends Account {
       raw: true,
     });
 
-    const block = await this.blocks.create({
+    const { work } = await this.work.generate(info.frontier);
+    const block = this.blocks.create({
       account: this.address,
       previous: info.frontier,
       representative: representative,
       balance: info.balance,
       link: '0',
-      key: this.privateKey,
+      privateKey: this.privateKey,
+      work,
     });
 
     return this.blocks.process(block, 'change');
@@ -240,13 +246,15 @@ export class Wallet extends Account {
     const hashInfo = await this.blocks.info(hash);
     const finalBalance = NonaBigNumber(balance).plus(hashInfo.amount);
 
+    const { work } = await this.work.generate(frontier);
     return await this.blocks.receiveBlock({
       account: this.address,
       previous: frontier,
       representative: representative,
       balance: finalBalance.toString(),
       link: hash,
-      key: this.privateKey,
+      privateKey: this.privateKey,
+      work,
     });
   }
 
@@ -273,13 +281,15 @@ export class Wallet extends Account {
       const hashInfo = await this.blocks.info(hash);
       balance = balance.plus(hashInfo.amount);
 
+      const { work } = await this.work.generate(previous);
       const processed = await this.blocks.receiveBlock({
         account: this.address,
         previous: previous,
         representative: representative,
         balance: balance.toString(),
         link: hash,
-        key: this.privateKey,
+        privateKey: this.privateKey,
+        work,
       });
 
       previous = processed;
