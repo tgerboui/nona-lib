@@ -23,24 +23,18 @@ export class Blocks extends RpcConsummer {
   }
 
   /**
-   * Creates a new block based on input data & signed with private key.
+   * Get the hash and signed the block with the provided private key.
    *
    * @param params - The options for creating the block.
    * @returns A promise that resolves to the created block.
    */
   public create(params: CreateBlockParams): SignedBlock {
-    const unsignedBlock = {
-      account: params.account,
-      previous: params.previous,
-      representative: params.representative,
-      balance: params.balance,
-      link: params.link,
-      work: params.work,
-    };
+    const { privateKey, ...unsignedBlock } = params;
+
     const hash = this.hash(unsignedBlock);
     const signature = this.sign({
       hash,
-      privateKey: params.privateKey,
+      privateKey,
     });
 
     const block = {
@@ -48,6 +42,7 @@ export class Blocks extends RpcConsummer {
       type: 'state',
       signature,
     };
+
     return block;
   }
 
@@ -119,10 +114,10 @@ export class Blocks extends RpcConsummer {
    * @param params - The parameters required for signing the block.
    * @returns The signed block.
    */
-  public sign(params: BlockSignParams): string {
+  public sign({ hash, privateKey }: BlockSignParams): string {
     return signBlock({
-      hash: params.hash,
-      secretKey: params.privateKey,
+      hash,
+      secretKey: privateKey,
     });
   }
 }
