@@ -23,7 +23,7 @@ export class Blocks extends RpcConsummer {
   }
 
   /**
-   * Get the hash and signed the block with the provided private key.
+   * Returns a formated block with the hash and the signature of the block.
    *
    * @param params - The options for creating the block.
    * @returns A promise that resolves to the created block.
@@ -93,17 +93,17 @@ export class Blocks extends RpcConsummer {
   /**
    * Get the hash of a block
    *
-   * @param params
+   * @param block
    * @returns
    */
-  public hash(params: HashBlockParams): string {
-    let previous = params.previous;
+  public hash(block: HashBlockParams): string {
+    let previous = block.previous;
     if (previous === '0') {
       previous = '0000000000000000000000000000000000000000000000000000000000000000';
     }
 
     return hashBlock({
-      ...params,
+      ...block,
       previous,
     });
   }
