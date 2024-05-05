@@ -9,11 +9,13 @@ import { NameService } from '../../../lib/services/name/name-service';
 import { Rpc } from '../../../lib/services/rpc/rpc';
 import { NonaUserError } from '../../../lib/shared/errors/user-error';
 import { randomNanoAddress, randomNanoAddresses, randomPublicKey } from '../../utils/utils';
+import { Work } from '../../../lib/modules/work/work';
 
 jest.mock('../../../lib/services/rpc/rpc');
 jest.mock('../../../lib/modules/blocks/blocks');
 jest.mock('../../../lib/modules/websocket/websocket');
 jest.mock('../../../lib/services/hash/key-service');
+jest.mock('../../../lib/modules/work/work');
 
 describe('Wallet class', () => {
   const keyServiceMock = KeyService as jest.Mocked<typeof KeyService>;
@@ -21,6 +23,7 @@ describe('Wallet class', () => {
   let wallet: Wallet;
   let rpcMock: jest.Mocked<Rpc>;
   let blocksMock: jest.Mocked<Blocks>;
+  let workMock: jest.Mocked<Work>;
   let websocketMock: jest.Mocked<NonaWebSocket>;
   const privateKey = 'privateKey';
 
@@ -37,7 +40,8 @@ describe('Wallet class', () => {
     rpcMock = new Rpc({ url: 'http://example.com' }) as jest.Mocked<Rpc>;
     blocksMock = new Blocks(rpcMock) as jest.Mocked<Blocks>;
     websocketMock = new NonaWebSocket({ url: 'http://example.com' }) as jest.Mocked<NonaWebSocket>;
-    wallet = new Wallet(nameServiceMock, privateKey, blocksMock, rpcMock, websocketMock);
+    workMock = new Work(rpcMock) as jest.Mocked<Work>;
+    wallet = new Wallet(nameServiceMock, privateKey, blocksMock, workMock, rpcMock, websocketMock);
   });
 
   it('should initialize properties correctly', () => {
@@ -50,18 +54,21 @@ describe('Wallet class', () => {
       const representative = randomNanoAddress();
       const lastHashes = { blockHash: '100' };
       wallet.receivable = jest.fn().mockResolvedValue(lastHashes);
-      blocksMock.create.mockResolvedValue({ hash: 'createdHash' } as any);
+      workMock.generate.mockResolvedValue({ work: 'work' } as any);
+      blocksMock.create.mockReturnValue({ hash: 'createdHash' } as any);
       blocksMock.process.mockResolvedValue('processedHash');
 
       const result = await wallet.open(representative);
       expect(wallet.receivable).toHaveBeenCalledWith({ count: 1, sort: true });
+      expect(workMock.generate).toHaveBeenCalledWith('publicKey');
       expect(blocksMock.create).toHaveBeenCalledWith({
         previous: '0',
         representative: representative,
         account: walletAddressMock,
         link: 'blockHash',
         balance: '100',
-        key: privateKey,
+        privateKey,
+        work: 'work',
       });
       expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdHash' }, 'open');
       expect(result).toBe('processedHash');
@@ -117,6 +124,7 @@ describe('Wallet class', () => {
       };
       const hashInfo = { amount: '5000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
+      workMock.generate.mockResolvedValue({ work: 'work' } as any);
       blocksMock.info.mockResolvedValue(hashInfo as any);
       blocksMock.receiveBlock.mockResolvedValue('processedReceiveHash');
 
@@ -125,13 +133,15 @@ describe('Wallet class', () => {
         representative: true,
         raw: true,
       });
+      expect(workMock.generate).toHaveBeenCalledWith('frontierHash');
       expect(blocksMock.receiveBlock).toHaveBeenCalledWith({
         account: walletAddressMock,
         previous: 'frontierHash',
         representative: 'nano_representative',
         balance: '6000000000000000000000000000000',
         link: 'transactionHash',
-        key: 'privateKey',
+        privateKey: 'privateKey',
+        work: 'work',
       });
       expect(result).toBe('processedReceiveHash');
     });
@@ -212,6 +222,9 @@ describe('Wallet class', () => {
       };
       const hashInfo = { amount: '2000000000000000000000000000000' };
       wallet.info = jest.fn().mockResolvedValue(info);
+      workMock.generate
+        .mockResolvedValueOnce({ work: 'work' } as any)
+        .mockResolvedValueOnce({ work: 'work2' } as any);
       blocksMock.info.mockResolvedValue(hashInfo as any);
       blocksMock.receiveBlock.mockResolvedValue('processedHash');
 
@@ -219,6 +232,9 @@ describe('Wallet class', () => {
       const result = await wallet['receiveHashes'](hashes);
 
       expect(wallet.info).toHaveBeenCalledTimes(1);
+      expect(workMock.generate).toHaveBeenCalledTimes(hashes.length);
+      expect(workMock.generate).toHaveBeenNthCalledWith(1, 'frontierHash');
+      expect(workMock.generate).toHaveBeenNthCalledWith(2, 'processedHash');
       expect(blocksMock.info).toHaveBeenCalledTimes(hashes.length);
       expect(blocksMock.receiveBlock).toHaveBeenCalledTimes(hashes.length);
       expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(1, {
@@ -227,7 +243,8 @@ describe('Wallet class', () => {
         representative: representative,
         balance: '3000000000000000000000000000000',
         link: 'hash1',
-        key: privateKey,
+        privateKey,
+        work: 'work',
       });
       expect(blocksMock.receiveBlock).toHaveBeenNthCalledWith(2, {
         account: walletAddressMock,
@@ -235,7 +252,8 @@ describe('Wallet class', () => {
         representative: representative,
         balance: '5000000000000000000000000000000',
         link: 'hash2',
-        key: privateKey,
+        privateKey,
+        work: 'work2',
       });
       expect(result).toEqual(['processedHash', 'processedHash']);
     });
@@ -250,7 +268,8 @@ describe('Wallet class', () => {
         representative: representative,
       };
       wallet.info = jest.fn().mockResolvedValue(info);
-      blocksMock.create.mockResolvedValue({ hash: 'createdSendHash' } as any);
+      workMock.generate.mockResolvedValue({ work: 'work' } as any);
+      blocksMock.create.mockReturnValueOnce({ hash: 'createdSendHash' } as any);
       blocksMock.process.mockResolvedValue('processedSendHash');
       KeyService.getPublicKey = jest.fn().mockReturnValue('publicKey');
 
@@ -259,13 +278,15 @@ describe('Wallet class', () => {
         representative: true,
         raw: true,
       });
+      expect(workMock.generate).toHaveBeenCalledWith('frontierHash');
       expect(blocksMock.create).toHaveBeenCalledWith({
         account: walletAddressMock,
         previous: 'frontierHash',
         representative: representative,
         balance: '4000000000000000000000000000000', // Adjusted for unit conversion in test setup
         link: 'publicKey',
-        key: privateKey,
+        privateKey,
+        work: 'work',
       });
       expect(KeyService.getPublicKey).toHaveBeenCalledWith(toAccount);
       expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdSendHash' }, 'send');
@@ -382,7 +403,8 @@ describe('Wallet class', () => {
       const newRepresentative = randomNanoAddress();
       const info = { balance: '1000', frontier: 'frontierHash' };
       wallet.info = jest.fn().mockResolvedValue(info);
-      blocksMock.create.mockResolvedValue({ hash: 'createdChangeHash' } as any);
+      workMock.generate.mockResolvedValue({ work: 'work' } as any);
+      blocksMock.create.mockReturnValueOnce({ hash: 'createdChangeHash' } as any);
       blocksMock.process.mockResolvedValue('processedChangeHash');
 
       const result = await wallet.change(newRepresentative);
@@ -395,7 +417,8 @@ describe('Wallet class', () => {
         representative: newRepresentative,
         balance: '1000',
         link: '0',
-        key: privateKey,
+        privateKey,
+        work: 'work',
       });
       expect(blocksMock.process).toHaveBeenCalledWith({ hash: 'createdChangeHash' }, 'change');
       expect(result).toBe('processedChangeHash');
