@@ -26,8 +26,8 @@ export class Rpc {
         ...body,
       });
 
-      if (data.error) {
-        this.handleResponseDataError(data.error);
+      if (!!data.error) {
+        this.handleResponseDataError(data);
       }
 
       return data as unknown;
@@ -36,9 +36,15 @@ export class Rpc {
     }
   }
 
-  private handleResponseDataError(error: unknown): never {
-    if (typeof error === 'string') {
-      throw new NonaRpcError(error);
+  private handleResponseDataError(errorResponse: RpcPostResponse): never {
+    // normal RPC node error
+    if (typeof errorResponse.error === 'string') {
+      throw new NonaRpcError(errorResponse.error);
+    }
+
+    // RPC NameService error
+    if (typeof errorResponse.error === 'number' && typeof errorResponse.message === 'string') {
+      throw new NonaRpcError(errorResponse.message);
     }
 
     throw new NonaRpcError('Unknown error occurred from RPC call');
