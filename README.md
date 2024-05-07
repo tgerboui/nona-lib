@@ -950,9 +950,9 @@ const info = await nona.rpc('account_info', {
 
 You can access to the `nameService` object with the following code:
 
-\```typescript
+```typescript
 const nameService = nona.nameService;
-\```
+```
 
 ### Resolve Username
 

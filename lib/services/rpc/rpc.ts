@@ -26,7 +26,7 @@ export class Rpc {
         ...body,
       });
 
-      if (!!data.error) {
+      if (data.error) {
         this.handleResponseDataError(data);
       }
 
