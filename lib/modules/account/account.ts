@@ -28,9 +28,10 @@ import {
   ReceivableHashes,
   ReceivableValues,
 } from './account-shemas';
+import { NanoAddress } from '../../shared/utils/address';
 
 export class Account extends RpcConsummer {
-  constructor(public address: string, private websocket: NonaWebSocket, rpc: Rpc) {
+  constructor(public address: NanoAddress, private websocket: NonaWebSocket, rpc: Rpc) {
     super(rpc);
   }
 

@@ -2,6 +2,7 @@ import { deriveAddress, derivePublicKey, deriveSecretKey } from 'nanocurrency';
 
 import { Nona } from '../../lib/nona';
 import { Rpc } from '../../lib/services/rpc/rpc';
+import { NanoAddress } from '../../lib/shared/utils/address';
 
 describe('Nona', () => {
   let nona: Nona;
@@ -10,7 +11,7 @@ describe('Nona', () => {
   const seed = 'cca6fda2102c958239b2e0f02e688414c23939271b7bcfe0d5014ab246071c12';
   const privateKey = deriveSecretKey(seed, 0);
   const publicKey = derivePublicKey(privateKey);
-  const address = deriveAddress(publicKey, { useNanoPrefix: true });
+  const address = deriveAddress(publicKey, { useNanoPrefix: true }) as NanoAddress;
 
   beforeEach(() => {
     nona = new Nona();

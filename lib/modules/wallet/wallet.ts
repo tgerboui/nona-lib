@@ -1,9 +1,11 @@
 import { Subscription } from 'rxjs';
 
 import { KeyService } from '../../services/hash/key-service';
+import { NameService } from '../../services/name/name-service';
 import { Rpc } from '../../services/rpc/rpc';
 import { UnitService } from '../../services/unit/unit-service';
 import { NonaUserError } from '../../shared/errors/user-error';
+import { NanoAddress, NanoTarget } from '../../shared/utils/address';
 import { NonaBigNumber } from '../../shared/utils/big-number';
 import { Account } from '../account/account';
 import { Blocks } from '../blocks/blocks';
@@ -16,9 +18,10 @@ import { WalletListAndReceiveParams } from './wallet-interface';
  */
 export class Wallet extends Account {
   public publicKey: string;
-  public address: string;
+  public address: NanoAddress;
 
   constructor(
+    private nameService: NameService,
     private privateKey: string,
     private blocks: Blocks,
     rpc: Rpc,
@@ -29,6 +32,7 @@ export class Wallet extends Account {
 
     super(address, websocket, rpc);
 
+    this.nameService = nameService;
     this.privateKey = privateKey;
     this.publicKey = publicKey;
     this.address = address;
@@ -41,7 +45,9 @@ export class Wallet extends Account {
    * @param representative The representative to open the wallet with.
    * @returns A promise that resolves to the hash of the opened block.
    */
-  public async open(representative: string): Promise<string> {
+  public async open(representative: NanoTarget): Promise<string> {
+    representative = await this.nameService.resolveTarget(representative);
+
     // Highest hash
     const lastHashes = await this.receivable({ count: 1, sort: true });
     if (Object.keys(lastHashes).length === 0) {
@@ -118,11 +124,12 @@ export class Wallet extends Account {
   /**
    * Sends a transaction to the specified address.
    *
-   * @param address The address to send the transaction to.
+   * @param target The {@link NanoTarget} to send the transaction to.
    * @param amount The amount to send in nano unit.
    * @returns A promise that resolves to the hash of the sent block.
    */
-  public async send(address: string, amount: number | string): Promise<string> {
+  public async send(target: NanoTarget, amount: number | string): Promise<string> {
+    target = await this.nameService.resolveTarget(target);
     // Convert nano amout to raw amount
     const rawAmount = UnitService.nanoToRaw(amount);
     if (rawAmount.isLessThanOrEqualTo(0) || rawAmount.isNaN()) {
@@ -138,7 +145,7 @@ export class Wallet extends Account {
       throw new NonaUserError('Insufficient balance');
     }
     const finalBalance = balance.minus(rawAmount);
-    const receiverPublicKey = KeyService.getPublicKey(address);
+    const receiverPublicKey = KeyService.getPublicKey(target);
 
     // TODO: Maybe set create block in a function in this class
     const block = await this.blocks.create({
@@ -192,7 +199,9 @@ export class Wallet extends Account {
    * @param representative The new representative to set.
    * @returns A promise that resolves to the hash of the changed block.
    */
-  public async change(representative: string): Promise<string> {
+  public async change(representative: NanoTarget): Promise<string> {
+    representative = await this.nameService.resolveTarget(representative);
+
     const info = await this.info({
       raw: true,
     });

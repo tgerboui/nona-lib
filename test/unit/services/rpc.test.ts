@@ -53,6 +53,18 @@ describe('Rpc', () => {
     await expect(rpc.call(action, body)).rejects.toThrow(error);
   });
 
+  it('should handle RPC name service error', async () => {
+    const action = 'someAction';
+    const body = { param1: 'value1', param2: 'value2' };
+    const message = 'Some error message';
+    const response = { data: { error: 500, message } };
+
+    axiosPostMock.mockResolvedValue(response);
+
+    await expect(rpc.call(action, body)).rejects.toThrow(NonaRpcError);
+    await expect(rpc.call(action, body)).rejects.toThrow(message);
+  });
+
   it('should handle RPC response with unknown data format error', async () => {
     const action = 'someAction';
     const body = { param1: 'value1', param2: 'value2' };

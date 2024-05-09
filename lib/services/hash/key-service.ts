@@ -1,4 +1,5 @@
 import { deriveAddress, derivePublicKey, deriveSecretKey, generateSeed } from 'nanocurrency';
+import { NanoAddress } from '../../shared/utils/address';
 
 export class KeyService {
   /**
@@ -37,9 +38,9 @@ export class KeyService {
    * @param publicKey - The public key to generate the address from, in hexadecimal format
    * @returns Address
    */
-  public static getAddress(publicKey: string): string {
+  public static getAddress(publicKey: string): NanoAddress {
     return deriveAddress(publicKey, {
       useNanoPrefix: true,
-    });
+    }) as NanoAddress;
   }
 }

@@ -2,6 +2,7 @@ import { Blocks } from '../../../lib/modules/blocks/blocks';
 import { CreateBlockParams } from '../../../lib/modules/blocks/blocks-interface';
 import { Block, BlockInfo } from '../../../lib/modules/blocks/blocks-schema';
 import { Rpc } from '../../../lib/services/rpc/rpc';
+import { randomNanoAddresses } from '../../utils/utils';
 
 // TODO: separate all mthods tests in describe blocks
 describe('Blocks', () => {
@@ -29,10 +30,12 @@ describe('Blocks', () => {
   });
 
   it('should call block_create RPC method with the provided params and parse the result', async () => {
+    const [fromAccount, representative, linkAsAccount] = randomNanoAddresses(3);
+
     const createParams: CreateBlockParams = {
-      account: 'account',
+      account: fromAccount,
       previous: 'previousHash',
-      representative: 'representative',
+      representative: representative,
       balance: '1000',
       key: 'privateKey',
       link: 'link',
@@ -42,7 +45,7 @@ describe('Blocks', () => {
     const block: Block['block'] = {
       ...createParamsWithoutKey,
       type: 'state',
-      link_as_account: 'linkAsAccount',
+      link_as_account: linkAsAccount,
       signature: 'signature',
       work: 'work',
     };
@@ -62,12 +65,12 @@ describe('Blocks', () => {
   it('should call process RPC method with the provided block and subtype, and parse the result', async () => {
     const block: Block['block'] = {
       type: 'state',
-      account: 'account',
+      account: 'nano_account',
       previous: 'previousHash',
-      representative: 'representative',
+      representative: 'nano_representative',
       balance: '1000',
       link: 'link',
-      link_as_account: 'linkAsAccount',
+      link_as_account: 'nano_linkAsAccount',
       signature: 'signature',
       work: 'work',
     };
@@ -86,9 +89,11 @@ describe('Blocks', () => {
   });
 
   it('should call block_info RPC method with the provided hash and parse the result', async () => {
+    const [blockAccount, contentsAccount, contentsLinkAsAccount] = randomNanoAddresses(3);
+
     const hash = 'blockHash';
     const infoResponse = {
-      block_account: 'block_account',
+      block_account: blockAccount,
       amount: 'amount',
       balance: 'balance',
       height: 'height',
@@ -97,12 +102,12 @@ describe('Blocks', () => {
       confirmed: 'confirmed',
       contents: {
         type: 'type',
-        account: 'account',
+        account: contentsAccount,
         previous: 'previous',
         representative: 'representative',
         balance: 'balance',
         link: 'link',
-        link_as_account: 'link_as_account',
+        link_as_account: contentsLinkAsAccount,
         signature: 'signature',
         work: 'work',
       },

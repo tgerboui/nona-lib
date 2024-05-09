@@ -177,6 +177,13 @@ For more details about websocket, see [Websocket](#websocket).
   - [Uptime](#uptime)
   - [Version](#version)
 - [Rpc](#rpc)
+- [Name Service](#name-service)
+  - [Resolve Username](#resolve-username)
+  - [Resolve Target](#resolve-target)
+- [Datatypes](#datatypess)
+  - [Nano Address](#nano-address)
+  - [Nano Username](#nano-username)
+  - [Nano Target](#nano-target)
 
 ## Wallet
 
@@ -196,10 +203,11 @@ const wallet = nona.wallet(privateKey);
 ### Open
 
 ```typescript
-open(representative: string): Promise<string>
+open(representative: NanoTarget): Promise<string>
 ```
 
-Opens the account with the provided representative.  
+Opens the account with the provided representative represented as a [NanoTarget](#nano-target) string.
+
 The first transaction of an account is crafted in a [slightly different way](https://docs.nano.org/integration-guides/key-management/#first-receive-transaction). To open an account, you must have sent some funds to it from another account.  
 Returns the hash of the transaction.
 
@@ -211,10 +219,10 @@ await wallet.open(representative);
 ### Send
 
 ```typescript
-send(address: string, amount: number | string): Promise<string>
+send(target: NanoTarget, amount: number | string): Promise<string>
 ```
 
-Sends a transaction to the specified address.  
+Sends a transaction to the specified [target](#nano-target).
 The amount is in nano unit.  
 Returns the hash of the transaction.
 
@@ -474,7 +482,7 @@ export interface ConfirmationFilter {
   /** List of block subtypes to filter the confirmation blocks. */
   subtype?: string[];
   /** Account addresses that received the transaction. */
-  to?: string[];
+  to?: NanoAddress[];
 }
 ````
 
@@ -515,7 +523,7 @@ export interface AccountHistoryParams {
   /** Reverse order */
   reverse?: boolean;
   /** Results will be filtered to only show sends/receives connected to the provided account(s). */
-  accounts?: string[];
+  accounts?: NanoAddress[];
   /**
    * if set to true instead of the default false, returns all blocks history and output all parameters of the block itself.
    */
@@ -658,11 +666,11 @@ interface WebSocketConfirmationParams {
 
 interface ConfirmationFilter {
   /** List of account addresses to filter the confirmation blocks. */
-  accounts?: string[];
+  accounts?: NanoAddress[];
   /** List of block subtypes to filter the confirmation blocks. */
   subtype?: string[];
   /** Account addresses that received the transaction. */
-  to?: string[];
+  to?: NanoAddress[];
 }
 ```
 
@@ -938,6 +946,73 @@ const info = await nona.rpc('account_info', {
 });
 ```
 
+## Name Service
+
+You can access to the `nameService` object with the following code:
+
+```typescript
+const nameService = nona.nameService;
+```
+
+### Resolve Username
+
+```typescript
+resolveUsername(username: NanoUsername): Promise<NanoAddress>
+```
+
+Resolves a username registered with the [Nano Name Service](https://nano.to) to the registed [NanoAddress](#nano-address)
+
+```typescript
+const username = '@nona-lib';
+const address = await nona.nameService.resolveUsername(username);
+```
+
+### Resolve Target
+
+```typescript
+resolveTarget(target: NanoTarget): Promise<NanoAddress>
+```
+
+Takes in a [NanoTarget](#nano-target) to potentially resolve. It checks if the target is a valid [NanoAddress](#nano-address) or a [NanoUsername](#nano-username). In the case a [NanoUsername](#nano-username) is passed to the method, it is [automatically resolved](#resolve-username)
+
+```typescript
+const target = '@nona-lib';
+const address = await nona.nameService.resolveTarget(target);
+```
+
+```typescript
+const target = 'nano_1rece...';
+const address = await nona.nameService.resolveTarget(target);
+```
+
+## Datatypes
+
+### Nano Address
+
+A valid Nano address according to the [offical docs](https://docs.nano.org/integration-guides/the-basics/#account-public-address):
+
+```
+nano_1anrzcuwe64rwxzcco8dkhpyxpi8kd7zsjc1oeimpc3ppca4mrjtwnqposrs
+```
+
+Its validity is checked with the [nanocurrency-js](https://github.com/marvinroger/nanocurrency-js/tree/master/packages/nanocurrency) package.
+
+
+### Nano Username
+
+A Nano username in the form of `@name`:
+
+```
+@nona-lib
+```
+
+This username is resolved at runtime with the [Nano Name Service](https://nano.to).
+
+
+### Nano Target
+
+A NanoTarget is either a valid [address](#nano-address) (e.g. `nano_1rece...`) or a resolveable username registered with the [Nano Name Service](https://nano.to) (e.g. `@nona-lib`). Nonalib automatically resolves these usernames to valid adresses for you.
+
 ## Handling Errors
 
 All handled errors are instances of `NonaError`.  
@@ -1000,7 +1075,7 @@ We encourage the community to contribute to the development and testing of Nona 
 
 #### Nano.to
 
-- [ ] Integrate [Nano name service](https://github.com/fwd/nano-to) (in progress)
+- [x] Integrate [Nano Name Service](https://github.com/fwd/nano-to)
 - [ ] Integrate [rpc.nano.to](https://rpc.nano.to/) commands
 
 ### Tests

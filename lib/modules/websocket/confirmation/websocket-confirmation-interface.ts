@@ -1,3 +1,5 @@
+import { NanoAddress } from '../../../shared/utils/address';
+
 export interface WebSocketConfirmationParams {
   /**
    * A function that will be called each time a transaction is received.
@@ -20,8 +22,8 @@ export interface WebSocketConfirmationParams {
 }
 
 export interface WebSocketUpdateConfirmationParams {
-  accountsAdd?: string[];
-  accountsDel?: string[];
+  accountsAdd?: NanoAddress[];
+  accountsDel?: NanoAddress[];
 }
 
 /**
@@ -29,7 +31,7 @@ export interface WebSocketUpdateConfirmationParams {
  */
 export interface ConfirmationBlock {
   /** Account address involved in the transaction. */
-  account: string;
+  account: NanoAddress;
   /** Amount transferred in the transaction, in nano unit. */
   amount: string;
   /** Unique hash of the block. This serves as an identifier for the block on the network. */
@@ -38,17 +40,17 @@ export interface ConfirmationBlock {
   confirmationType: string;
   block: {
     /** The account address that owns this block. */
-    account: string;
+    account: NanoAddress;
     /** Hash of the previous block in the account's chain, linking this block to its predecessor. 0 if open block. */
     previous: string;
     /** Representative of the account. */
-    representative: string;
+    representative: NanoAddress;
     /** Resulting balance of the account in nano unit. */
     balance: string;
     /** In a send block, public key of the destination account; in a receive block, the hash of the send block being received; in a change block, 0. */
     link: string;
     /** In a send block, account address of the link field. */
-    linkAsAccount: string;
+    linkAsAccount: NanoAddress;
     /** Digital signature of the block. */
     signature: string;
     /** Work field represents the Proof of Work for the block. */
@@ -60,9 +62,9 @@ export interface ConfirmationBlock {
 
 export interface ConfirmationFilter {
   /** List of account addresses to filter the confirmation blocks. */
-  accounts?: string[];
+  accounts?: NanoAddress[];
   /** List of block subtypes to filter the confirmation blocks. */
   subtype?: string[];
   /** Account addresses that received the transaction. */
-  to?: string[];
+  to?: NanoAddress[];
 }

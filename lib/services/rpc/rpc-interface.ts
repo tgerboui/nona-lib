@@ -1,3 +1,4 @@
 export interface RpcPostResponse {
-  error?: unknown;
+  error?: string | number;
+  message?: string;
 }
