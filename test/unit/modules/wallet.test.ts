@@ -60,7 +60,7 @@ describe('Wallet class', () => {
 
       const result = await wallet.open(representative);
       expect(wallet.receivable).toHaveBeenCalledWith({ count: 1, sort: true });
-      expect(workMock.generate).toHaveBeenCalledWith('publicKey');
+      expect(workMock.generate).toHaveBeenCalledWith(publicKeyMock);
       expect(blocksMock.create).toHaveBeenCalledWith({
         previous: '0',
         representative: representative,

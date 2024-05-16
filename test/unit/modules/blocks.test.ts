@@ -1,11 +1,14 @@
 import { hashBlock, signBlock } from 'nanocurrency';
 import { Blocks } from '../../../lib/modules/blocks/blocks';
-import { CreateBlockParams, SignedBlock } from '../../../lib/modules/blocks/blocks-interface';
+import { CreateBlockParams } from '../../../lib/modules/blocks/blocks-interface';
 import { Block, BlockInfo } from '../../../lib/modules/blocks/blocks-schema';
 import { Rpc } from '../../../lib/services/rpc/rpc';
-import { randomNanoAddresses } from '../../utils/utils';
 
-jest.mock('nanocurrency');
+jest.mock('nanocurrency', () => ({
+  ...jest.requireActual('nanocurrency'),
+  hashBlock: jest.fn(),
+  signBlock: jest.fn(),
+}));
 
 // TODO: separate all mthods tests in describe blocks
 describe('Blocks', () => {
@@ -94,7 +97,7 @@ describe('Blocks', () => {
     it('should call block_info RPC method with the provided hash and parse the result', async () => {
       const hash = 'blockHash';
       const infoResponse = {
-        block_account: 'block_account',
+        block_account: 'nano_1t7qkq38d8imy6hoin48ywxpokorxoh8kqz4zntxk6c4qkpsznhitda4a5wo',
         amount: 'amount',
         balance: 'balance',
         height: 'height',
@@ -103,12 +106,12 @@ describe('Blocks', () => {
         confirmed: 'confirmed',
         contents: {
           type: 'type',
-          account: 'account',
+          account: 'nano_1t7qkq38d8imy6hoin48ywxpokorxoh8kqz4zntxk6c4qkpsznhitda4a5wo',
           previous: 'previous',
-          representative: 'representative',
+          representative: 'nano_1tx1oxyczf9mczjnw8k8fktydjekry57aeet8f9cyxtpg9uf56owy4iup6ad',
           balance: 'balance',
           link: 'link',
-          link_as_account: 'link_as_account',
+          link_as_account: 'nano_3barjiyag1agq4akumc4hstgmjiqd5mhi81y5enkwh95srs76q4fy1j8u4ie',
           signature: 'signature',
           work: 'work',
         },
