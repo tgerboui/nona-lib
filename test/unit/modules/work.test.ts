@@ -15,10 +15,10 @@ describe('Work class', () => {
     it('should call the RPC method with the correct parameters and return the generated work', async () => {
       const hash = 'abc123';
       const generatedWork = {
-        work: 'work',
-        difficulty: 'difficulty',
-        multiplier: 'multiplier',
-        hash: 'hash',
+        work: '2b3d689bbcb21dca',
+        difficulty: 'fffffff93c41ec94',
+        multiplier: '1.182623871097636',
+        hash: '718CC2121C3E641059BC1C2CFC45666C99E8AE922F7A807B7D07B62C995D79E2',
       };
 
       rpcMock.call.mockResolvedValue(generatedWork);
